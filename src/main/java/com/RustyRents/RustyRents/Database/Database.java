@@ -35,7 +35,7 @@ public class Database {
         values = "'" + userId + "' , '" + password + "'";
         query = "INSERT INTO No_Hackers_Pls VALUES (" + values + ")";
 
-        System.out.println("Database.storeNewLogin : Query to insert new login given userId and password:");
+        System.out.println("Database.storeNewLogin : Query to insert new login given userId and password.");
         System.out.println(query);
 
         try {
@@ -56,7 +56,7 @@ public class Database {
                 values = "NULL, '" + username + "', '" + email + "'";
                 query = "INSERT INTO users VALUES (" + values + ")";
 
-                System.out.println("Database.addNewUser : Query to insert new user with username and email:");
+                System.out.println("Database.addNewUser : Query to insert new user with username and email.");
                 System.out.println(query);
 
                 statement.execute(query);
@@ -74,7 +74,7 @@ public class Database {
 
         query = "SELECT user_id FROM users WHERE username = '" + username + "'";
 
-        System.out.println("Database.isValidLogin: Query for selecting the id of given username:");
+        System.out.println("Database.isValidLogin: Query for selecting the id of given username.");
         System.out.println(query);
 
         try {
@@ -90,7 +90,7 @@ public class Database {
 
             query = "SELECT password FROM No_Hackers_Pls WHERE user_id = " + userId;
 
-            System.out.println("Database.isValidLogin: Query to select password of given username:");
+            System.out.println("Database.isValidLogin: Query to select password of given username.");
             System.out.println(query);
 
             rs = statement.executeQuery(query);
@@ -113,7 +113,7 @@ public class Database {
 
         query = "SELECT user_id FROM users WHERE username = '" + username + "'";
 
-        System.out.println("Database.getUserId : Query to select user ID from given username:");
+        System.out.println("Database.getUserId : Query to select user ID from given username.");
         System.out.println(query);
 
         try {
@@ -132,7 +132,7 @@ public class Database {
 
         query = "SELECT email FROM users WHERE user_id = " + currentUserId;
 
-        System.out.println("Database.checkEmailMatch : Query to select user email given user ID:");
+        System.out.println("Database.checkEmailMatch : Query to select user email given user ID.");
         System.out.println(query);
 
         try {
@@ -155,7 +155,7 @@ public class Database {
 
         query = "UPDATE users SET email = '" + newEmail + "' WHERE user_id = " + currentUserId;
 
-        System.out.println("Database.changeEmail : Query to update email address of user with given ID:");
+        System.out.println("Database.changeEmail : Query to update email address of user with given ID.");
         System.out.println(query);
 
         try {
@@ -168,7 +168,7 @@ public class Database {
 
     public static boolean checkIfUsernameIsTaken(String username) {
         query = "Select username FROM users WHERE username = '" + username + "'";
-        System.out.println("Database.checkIfUsernameIsTaken : Query to select username given username:");
+        System.out.println("Database.checkIfUsernameIsTaken : Query to select username given username.");
         System.out.println(query);
         try {
             ResultSet rs = statement.executeQuery(query);
@@ -185,7 +185,7 @@ public class Database {
 
     public static boolean checkIfEmailIsTaken(String email) {
         query = "Select email FROM users WHERE email = '" + email + "'";
-        System.out.println("Database.checkIfUsernameIsTaken : Query to select email given email:");
+        System.out.println("Database.checkIfUsernameIsTaken : Query to select email given email.");
         System.out.println(query);
         try {
             ResultSet rs = statement.executeQuery(query);
@@ -203,7 +203,7 @@ public class Database {
 
         query = "SELECT password FROM no_hackers_pls WHERE user_id = " + currentUserId;
 
-        System.out.println("Database.checkPasswordMatch : Query to select user passcode given user ID:");
+        System.out.println("Database.checkPasswordMatch : Query to select user passcode given user ID.");
         System.out.println(query);
 
         try {
@@ -225,17 +225,17 @@ public class Database {
     public static boolean checkIfEmailCodeIsAlreadyGenerated() {
         query = "SELECT user_id FROM emailcodes WHERE user_id = " + currentUserId;
 
-        System.out.println("checkings");
+        System.out.println("Database.checkIfEmailCodeIsAlreadyGenerated: Query to select email code given user ID.");
         System.out.println(query);
 
         try {
 
             ResultSet rs = statement.executeQuery(query);
             if (rs.next()) {
-                System.out.println("exists");
+                System.out.println("Database.checkIfEmailCodeIsAlreadyGenerated: Email code is already generated.");
                 return true;
             }
-            System.out.println("doesnt exist");
+            System.out.println("Database.checkIfEmailCodeIsAlreadyGenerated: Email code isn't generated yet.");
             return false;
 
         } catch(Exception e) {System.out.println(e);}
@@ -248,7 +248,7 @@ public class Database {
 
         query = "SELECT generatedcode FROM emailcodes WHERE user_id = " + currentUserId;
 
-        System.out.println("checking matching email code");
+        System.out.println("Database.checkEmailCodeMatch: Query to select email code given user ID.");
         System.out.println(query);
 
         try {
@@ -256,9 +256,12 @@ public class Database {
             ResultSet rs = statement.executeQuery(query);
             rs.next();
 
-            if (rs.getString(1).equalsIgnoreCase(emailcode))
+            if (rs.getString(1).equalsIgnoreCase(emailcode)) {
+                System.out.println("Database.checkEmailCodeMatch: Email code matches.");
                 return true;
+            }
 
+            System.out.println("Database.checkEmailCodeMatch: Email code doesn't match.");
             return false;
 
         } catch(Exception e) {System.out.println(e);}
@@ -288,15 +291,15 @@ public class Database {
         values = "'" + currentUserId + "' , '" + currentGeneratedCode + "'";
         query = "INSERT INTO emailcodes VALUES (" + values + ")";
 
-        System.out.println("GENERATE EMAILCODE");
+        System.out.println("Database.generateEmailCode: Query to insert an email code.");
         System.out.println(query);
 
         try {
             if (checkIfEmailCodeIsAlreadyGenerated()) {
-                System.out.println("Code is already generated");
+                System.out.println("Database.generateEmailCode: Email code is already generated.");
             }
             else if (!checkIfEmailCodeIsAlreadyGenerated()) {
-                System.out.println("Generating code");
+                System.out.println("Database.generateEmailcode: Generating email code.");
                 statement.execute("INSERT INTO emailcodes VALUES ('" + currentUserId + "' , '" + currentGeneratedCode + "')");
             }
 
@@ -308,7 +311,7 @@ public class Database {
         query = "DELETE FROM emailcodes WHERE user_id = " + currentUserId;
 
         try {
-            System.out.println("Removing emailcode");
+            System.out.println("Database.removeEmailCode: Query to delete email codes given user ID.");
             statement.execute(query);
         }
         catch(Exception e ) {
@@ -319,7 +322,7 @@ public class Database {
     public static void removeAllEmailCodes() {
         query = "DELETE FROM emailcodes";
         try {
-            System.out.println("Removing emailcode");
+            System.out.println("Database.removeAllEmailCodes: Query to delete all email codes.");
             statement.execute(query);
         }
         catch(Exception e ) {
@@ -332,15 +335,15 @@ public class Database {
         values = "'" + currentUserId + "' , '" + currentGeneratedCode + "'";
         query = "INSERT INTO softwaretokencodes VALUES (" + values + ")";
 
-        System.out.println("GENERATE EMAILCODE");
+        System.out.println("Database.generateSoftwareCode: Query to insert software code given user ID.");
         System.out.println(query);
 
         try {
             if (checkIfSoftwareCodeIsAlreadyGenerated()) {
-                System.out.println("Code is already generated");
+                System.out.println("Database.generateSoftwareCode: Software code is already generated.");
             }
             else if (!checkIfSoftwareCodeIsAlreadyGenerated()) {
-                System.out.println("Generating code");
+                System.out.println("Database.generateSoftwareCode: Generating software code.");
                 statement.execute("INSERT INTO softwaretokencodes VALUES ('" + currentUserId + "' , '" + currentGeneratedCode + "')");
             }
 
@@ -352,7 +355,7 @@ public class Database {
         query = "DELETE FROM softwaretokencodes WHERE user_id = " + currentUserId;
 
         try {
-            System.out.println("Removing softwaretokencode");
+            System.out.println("Database.removeSoftwareCode: Query to delete software codes given user ID.");
             statement.execute(query);
         }
         catch(Exception e ) {
@@ -363,7 +366,7 @@ public class Database {
     public static void removeAllSoftwareCodes() {
         query = "DELETE FROM softwaretokencodes";
         try {
-            System.out.println("Removing softwaretokencode");
+            System.out.println("Database.removeAllSoftwareCodes: Query to delete all software tokens.");
             statement.execute(query);
         }
         catch(Exception e ) {
@@ -374,17 +377,17 @@ public class Database {
     public static boolean checkIfSoftwareCodeIsAlreadyGenerated() {
         query = "SELECT user_id FROM softwaretokencodes WHERE user_id = " + currentUserId;
 
-        System.out.println("checkings");
+        System.out.println("Database.checkIfSoftwareCodeIsAlreadyGenerated: Query to select software code given user ID.");
         System.out.println(query);
 
         try {
 
             ResultSet rs = statement.executeQuery(query);
             if (rs.next()) {
-                System.out.println("exists");
+                System.out.println("Database.checkIfSoftwareCodeIsAlreadyGenerated: Software code is already generated.");
                 return true;
             }
-            System.out.println("doesnt exist");
+            System.out.println("Database.checkIfSoftwareCodeIsAlreadyGenerated: Software code isn't generated yet.");
             return false;
 
         } catch(Exception e) {System.out.println(e);}
@@ -397,7 +400,7 @@ public class Database {
 
         query = "SELECT generatedcode FROM softwaretokencodes WHERE user_id = " + currentUserId;
 
-        System.out.println("checking matching software token code");
+        System.out.println("Database.checkSoftwareCodeMatch: Query to select software code given user ID.");
         System.out.println(query);
 
         try {
@@ -405,9 +408,12 @@ public class Database {
             ResultSet rs = statement.executeQuery(query);
             rs.next();
 
-            if (rs.getString(1).equalsIgnoreCase(softwaretokencode))
+            if (rs.getString(1).equalsIgnoreCase(softwaretokencode)) {
+                System.out.println("Database.checkSoftwareCodeMatch: Software code matches.");
                 return true;
+            }
 
+            System.out.println("Database.checkSoftwareCodeMatch: Software code doesn't match.");
             return false;
 
         } catch(Exception e) {System.out.println(e);}

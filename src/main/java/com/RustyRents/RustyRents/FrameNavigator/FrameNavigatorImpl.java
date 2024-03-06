@@ -1,6 +1,7 @@
 package com.RustyRents.RustyRents.FrameNavigator;
 
 import com.RustyRents.RustyRents.Database.Database;
+import com.RustyRents.RustyRents.LogIn.SoftwareToken;
 import com.RustyRents.RustyRents.MainMenu.MainMenu;
 import com.sun.tools.javac.Main;
 import org.springframework.beans.BeansException;
@@ -27,7 +28,12 @@ public class FrameNavigatorImpl implements FrameNavigator, ApplicationContextAwa
     public void showFrame(Class<? extends JFrame> frameClass) {
         JFrame frame = applicationContext.getBean(frameClass);
         if (currentFrame != null) {
-            currentFrame.dispose();
+            if (frame instanceof SoftwareToken) {
+                //do nothing
+            }
+            else {
+                currentFrame.dispose();
+            }
         }
 
         if (frame instanceof MainMenu) {

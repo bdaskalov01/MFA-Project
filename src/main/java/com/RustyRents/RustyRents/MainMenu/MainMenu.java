@@ -7,10 +7,6 @@ import com.RustyRents.RustyRents.Listings.MyListings;
 import com.RustyRents.RustyRents.Listings.ViewListings;
 import com.RustyRents.RustyRents.LogIn.LogIn;
 import com.RustyRents.RustyRents.Options.Options;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -18,24 +14,24 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-// @Lazy ??? - NE RABOTI
 @Component
 public class MainMenu extends JFrame implements ActionListener{
 
     JButton settingsButton, myProfileButton, myListingsButton, viewListingsButon, logOutButton;
-    JLabel label2 = new JLabel();
-
-    String neshto;
+    JLabel greetingsText, backgroundLabel, logoImage;
+    ImageIcon backgroundImage, appIcon, settingsIcon, appLogo, logOutImage;
+    JPanel mainMenuPanel;
+    JLayeredPane layeredPane;
 
     private final FrameNavigator framenavigator;
     public MainMenu(FrameNavigator framenavigator) {
         this.framenavigator = framenavigator;
 
-        ImageIcon backgroundImage = new ImageIcon("CityBackgroundImage.jpg");
-        ImageIcon appIcon = new ImageIcon("RustyRentsIcon.png");
-        ImageIcon settingsIcon = new ImageIcon("SettingsIcon.png");
-        ImageIcon appLogo = new ImageIcon("RustyRentsLogo.png");
-        ImageIcon logOutImage = new ImageIcon("LogOutImage.png");
+        backgroundImage = new ImageIcon("CityBackgroundImage.jpg");
+        appIcon = new ImageIcon("RustyRentsIcon.png");
+        settingsIcon = new ImageIcon("SettingsIcon.png");
+        appLogo = new ImageIcon("RustyRentsLogo.png");
+        logOutImage = new ImageIcon("LogOutImage.png");
 
         logOutButton = new JButton(logOutImage);
         logOutButton.setBounds(5,5,50,50);
@@ -77,26 +73,24 @@ public class MainMenu extends JFrame implements ActionListener{
         viewListingsButon.setBackground(new Color(139,0,139));
         viewListingsButon.setForeground(Color.white);
 
-        JLabel backgroundLabel = new JLabel();
+        backgroundLabel = new JLabel();
         backgroundLabel.setIcon(backgroundImage);
         backgroundLabel.setBounds(0, 0, 490, 700);
 
-        JLabel logoImage = new JLabel();
+        logoImage = new JLabel();
         logoImage.setIcon(appLogo);
         logoImage.setBounds(130, 0, 300, 300);
 
-        neshto = Database.getUsername();
-
-        JLabel greetingsText = new JLabel("Добре дошъл, " + neshto);
+        greetingsText = new JLabel();
         greetingsText.setBounds(150, 230, 200, 50);
         greetingsText.setForeground(new Color(139,0,139));
 
-        JPanel mainMenuPanel = new JPanel();
+        mainMenuPanel = new JPanel();
         mainMenuPanel.add(backgroundLabel);
 
-        JLayeredPane layeredPane = new JLayeredPane();
+        layeredPane = new JLayeredPane();
         layeredPane.setBounds(0, 0, 490, 700);
-        //layeredPane.add(backgroundLabel, Integer.valueOf(0));
+        layeredPane.add(backgroundLabel, Integer.valueOf(0));
         layeredPane.add(logoImage, Integer.valueOf(1));
         layeredPane.add(settingsButton, Integer.valueOf(2));
         layeredPane.add(myListingsButton, Integer.valueOf(3));
@@ -115,28 +109,27 @@ public class MainMenu extends JFrame implements ActionListener{
     }
 
     public void refreshUIData() {
-        neshto = Database.getUsername();
+        greetingsText.setText("Добре дошъл, " + Database.getUsername());
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource()==settingsButton) {
-
+            framenavigator.showFrame(Options.class);
         }
         else if (e.getSource()== myListingsButton) {
-
+           // framenavigator.showFrame(ViewListings.class);
         }
         else if (e.getSource()== viewListingsButon) {
             framenavigator.showFrame(ViewListings.class);
         }
 
         else if (e.getSource()== myProfileButton) {
-
+            framenavigator.showFrame(MyProfile.class);
         }
         else if (e.getSource()==logOutButton) {
             Database.setCurrentUserId(0);
-            this.dispose();
-            //logIn.innitUI();
+            framenavigator.showFrame(LogIn.class);
         }
     }
 }

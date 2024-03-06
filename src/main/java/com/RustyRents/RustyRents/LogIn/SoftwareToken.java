@@ -2,13 +2,11 @@ package com.RustyRents.RustyRents.LogIn;
 
 import com.RustyRents.RustyRents.Database.Database;
 import com.RustyRents.RustyRents.FrameNavigator.FrameNavigator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,7 +19,7 @@ import java.util.Base64;
 
 @Lazy
 @Component
-public class HardwareToken extends JFrame implements ActionListener {
+public class SoftwareToken extends JFrame implements ActionListener {
 
     private final FrameNavigator frameNavigator;
 
@@ -41,7 +39,7 @@ public class HardwareToken extends JFrame implements ActionListener {
     private int count = 60;
 
 
-    public HardwareToken(FrameNavigator frameNavigator) throws InterruptedException {
+    public SoftwareToken(FrameNavigator frameNavigator) throws InterruptedException {
 
         // TODO имплементирай проверка дали съществува credentials файл
 

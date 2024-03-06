@@ -47,24 +47,17 @@ public class Register extends JFrame implements ActionListener {
         this.frameNavigator = frameNavigator;
         ImageIcon appIcon = new ImageIcon ("RustyRentsIcon.png");
         ImageIcon registrationIcon=new ImageIcon("RustyRentsLogo.png");
-        ImageIcon secondPanelLogo=new ImageIcon("RustyRentsLogo.png");
+        ImageIcon secondPanelLogo= new ImageIcon("RustyRentsLogo.png");
         ImageIcon thirdPanelLogo=new ImageIcon("RustyRentsLogo.png");
         Image rustyRentsLogo=registrationIcon.getImage();
         Image newing = rustyRentsLogo.getScaledInstance(100,100,Image.SCALE_SMOOTH);
-
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setIconImage(appIcon.getImage());
-        this.setSize(500,500);
-        this.setLocationRelativeTo(null);
-        this.setLayout(new BorderLayout());
-        this.setResizable(false);
 
         registrationIcon=new ImageIcon(newing);
         secondPanelLogo=new ImageIcon(newing);
         thirdPanelLogo=new ImageIcon(newing);
 
         panelContainer.setLayout(cardLayout);
-        panelContainer.add(secondPanel,"2");
+        panelContainer.add(secondPanel,"1");
         cardLayout.show(panelContainer,"1");
 
         //firstPanel
@@ -95,20 +88,6 @@ public class Register extends JFrame implements ActionListener {
 
         initializeSubPanels(subPanelForFirstPanel1,subPanelForFirstPanel2,subPanelForFirstPanel3);
 
-        subPanelForFirstPanel1.add(headerImage);
-        subPanelForFirstPanel2.add(accountOptionLabel,BorderLayout.SOUTH);
-        subPanelForFirstPanel2.add(customerButton,BorderLayout.SOUTH);
-        subPanelForFirstPanel2.add(landlordButton,BorderLayout.SOUTH);
-        subPanelForFirstPanel3.add(backToLogInScreenButton);
-
-        firstPanel.add(subPanelForFirstPanel1,BorderLayout.NORTH);
-        firstPanel.add(subPanelForFirstPanel2,BorderLayout.CENTER);
-        firstPanel.add(subPanelForFirstPanel3,BorderLayout.SOUTH);
-
-
-
-
-        //secondPanel
         secondPanel.setLayout(new BorderLayout());
 
         JLabel headerImageForSecondPanel=new JLabel(secondPanelLogo);
@@ -159,56 +138,12 @@ public class Register extends JFrame implements ActionListener {
         secondPanel.add(subPanelForSecondPanel2,BorderLayout.CENTER);
         secondPanel.add(subPanelForSecondPanel3,BorderLayout.SOUTH);
 
-
-
-        //thirdPanel
-        thirdPanel.setLayout(new BorderLayout());
-
-        JLabel headerForThirdPanel=new JLabel(thirdPanelLogo);
-        JLabel cityLabel=new JLabel("City:");
-        JLabel provinceLabel=new JLabel("Province:");
-        JLabel customerStatusLabel=new JLabel("Status:");
-        JLabel prefLocationLabel=new JLabel("Preferred location:");
-
-        JTextField cityTextField=new JTextField();
-        cityTextField.setPreferredSize(new Dimension(120,20));
-        JTextField provinceTextField=new JTextField();
-        provinceTextField.setPreferredSize(new Dimension(120,20));
-
-
-        String[] customerStatus={"Student","Average class","Wealthy","Poor"};
-        customerStatusComboBox=new JComboBox(customerStatus);
-        String[] desiredLocation={"Near Universities","Near the center","Wealthy neighbourhood","Suburbs","Calm neighbourhood"};
-        preferredLocationComboBox=new JComboBox(desiredLocation);
-
-        finalNextButton.addActionListener(this);
-        finalNextButton.setForeground(Color.white);
-        finalNextButton.setBackground(new Color(139,0,139));
-
-        //subPanels
-        JPanel subPanelForThirdPanel1=new JPanel();
-        JPanel subPanelForThirdPanel2=new JPanel();
-        JPanel subPanelForThirdPanel3=new JPanel();
-
-        initializeSubPanels(subPanelForThirdPanel1,subPanelForThirdPanel2,subPanelForThirdPanel3);
-
-        subPanelForThirdPanel1.add(headerForThirdPanel);
-
-        subPanelForThirdPanel2.add(cityLabel);
-        subPanelForThirdPanel2.add(cityTextField);
-        subPanelForThirdPanel2.add(provinceLabel);
-        subPanelForThirdPanel2.add(provinceTextField);
-        subPanelForThirdPanel2.add(customerStatusLabel);
-        subPanelForThirdPanel2.add(customerStatusComboBox);
-        subPanelForThirdPanel2.add(prefLocationLabel);
-        subPanelForThirdPanel2.add(preferredLocationComboBox);
-
-        subPanelForThirdPanel3.add(finalNextButton);
-
-        thirdPanel.add(subPanelForThirdPanel1,BorderLayout.NORTH);
-        thirdPanel.add(subPanelForThirdPanel2,BorderLayout.CENTER);
-        thirdPanel.add(subPanelForThirdPanel3,BorderLayout.SOUTH);
-
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setIconImage(appIcon.getImage());
+        this.setSize(500,500);
+        this.setLocationRelativeTo(null);
+        this.setLayout(new BorderLayout());
+        this.setResizable(false);
         this.add(panelContainer);
         this.pack();
     }
