@@ -9,7 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
+import javax.xml.crypto.Data;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.Color;
@@ -30,18 +33,20 @@ public class MyListings extends JFrame implements ActionListener {
     Object[] columns, row;
     DefaultTableModel model;
     JScrollPane pane;
-    JButton backButton, btnViewProperty;
+    JButton backButton, btnViewProperty, addPropertyButton, deletePropertyButton;
+
+    JComboBox<String> cbCityNameFilter, cbPropertyTypeFilter;
 
     // Declare top row text fields
-    private JTextField tfCityFilter;
+    private JTextField tfListingNameFilter;
     private JTextField tfQuarterFilter;
     private JTextField tfPropertyTypeFilter;
     private JTextField tfMinAreaFilter;
     private JTextField tfMaxPriceFilter;
 
     // Declare top row labels
-    private JLabel lblCityFilter;
-    private JLabel lblQuarterFilter;
+    private JLabel lblListingNameFilter;
+    private JLabel lblCityNameFilter;
     private JLabel lblPropertyTypeFilter;
     private JLabel lblMinAreaFilter;
     private JLabel lblMaxPriceFilter;
@@ -59,7 +64,7 @@ public class MyListings extends JFrame implements ActionListener {
         ImageIcon appIcon = new ImageIcon("RustyRentsIcon.png");
 
         //TODO replace column objects with DB values
-        columns = new Object[] {"Име на обява", "Град", "Вид имот", "Цена"};
+        columns = new Object[] {"Номер на обява", "Име на обява", "Град", "Вид имот", "Цена"};
 
 
         model = new DefaultTableModel();
@@ -68,109 +73,113 @@ public class MyListings extends JFrame implements ActionListener {
         //TODO Connect DB with table
         table = new JTable();
         table.setModel(model);
-        table.setBackground(Color.MAGENTA);
+        //table.setBackground(Color.MAGENTA);
         table.setForeground(Color.black);
-        table.setSelectionBackground(Color.red);
+        table.setSelectionBackground(Color.MAGENTA);
         table.setGridColor(Color.red);
         table.setSelectionForeground(Color.white);
         table.setFont(new Font("Tahoma", Font.PLAIN, 17));
         table.setRowHeight(30);
         table.setAutoCreateRowSorter(true);
-
+        table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent event) {
+                if (table.getSelectedRow() > -1) {
+                    try {
+                        int selectedListingId = Integer.parseInt(table.getValueAt(table.getSelectedRow(), 0).toString());
+                        Database.setCurrentListingId(selectedListingId);
+                    }
+                    catch(Exception e) {
+                        System.out.println(e);
+                    }
+                }
+            }
+        });
 
         pane = new JScrollPane(table);
         pane.setBounds(18, 114, 705, 262);
         pane.setForeground(Color.RED);
         pane.setBackground(Color.WHITE);
 
-        row = new Object[4];
+        row = new Object[5];
 
         //
         // Top row of window
         //
 
-        // City label
-        lblCityFilter = new JLabel("Град");
-        lblCityFilter.setFont(new Font("Tahoma", Font.PLAIN, LABELS_FONT_SIZE));
-        lblCityFilter.setForeground(Color.BLACK);
-        lblCityFilter.setBounds(54, LABELS_POSITION_Y, LABELS_WIDTH, LABELS_HEIGHT);
-        getContentPane().add(lblCityFilter);
+        // Listing name label
+        lblListingNameFilter = new JLabel("Име на обявата");
+        lblListingNameFilter.setFont(new Font("Tahoma", Font.PLAIN, LABELS_FONT_SIZE));
+        lblListingNameFilter.setForeground(Color.BLACK);
+        lblListingNameFilter.setBounds(54, LABELS_POSITION_Y, 250, LABELS_HEIGHT);
+        getContentPane().add(lblListingNameFilter);
 
-        // City text field
-        tfCityFilter = new JTextField();
-        tfCityFilter.setBounds(44, 79, 78, 19);
-        getContentPane().add(tfCityFilter);
-        tfCityFilter.setColumns(10);
+        // Listing name text field
+        tfListingNameFilter = new JTextField();
+        tfListingNameFilter.setBounds(44, 79, 200, 19);
+        getContentPane().add(tfListingNameFilter);
+        tfListingNameFilter.setColumns(10);
 
-        // City quarter label
-        lblQuarterFilter = new JLabel("Квартал");
-        lblQuarterFilter.setFont(new Font("Tahoma", Font.PLAIN, LABELS_FONT_SIZE));
-        lblQuarterFilter.setForeground(Color.BLACK);
-        lblQuarterFilter.setBounds(157, LABELS_POSITION_Y, LABELS_WIDTH, LABELS_HEIGHT);
-        getContentPane().add(lblQuarterFilter);
+        // City name filter label
+        lblCityNameFilter = new JLabel("Град");
+        lblCityNameFilter.setForeground(Color.BLACK);
+        lblCityNameFilter.setFont(new Font("Tahoma", Font.PLAIN, LABELS_FONT_SIZE));
+        lblCityNameFilter.setBounds(260, LABELS_POSITION_Y, LABELS_WIDTH, LABELS_HEIGHT);
+        getContentPane().add(lblCityNameFilter);
 
-        // City quarter text field
-        tfQuarterFilter = new JTextField();
-        tfQuarterFilter.setBounds(150, 79, 107, 19);
-        getContentPane().add(tfQuarterFilter);
-        tfQuarterFilter.setColumns(10);
+        // City name filter combo box
+        cbCityNameFilter = new JComboBox<String>();
+        cbCityNameFilter.setBounds(255, 79, 130, 19);
+        cbCityNameFilter.insertItemAt("", 0);
+        ResultSet rsCity = Database.getCity();
+        try {
+            while (rsCity.next()) {
+                cbCityNameFilter.addItem(rsCity.getString(1));
+            }
+        }
+        catch (Exception e) {
+            System.out.println(e);
+        }
+        cbCityNameFilter.setSelectedIndex(-1);
+        getContentPane().add(cbCityNameFilter);
 
-        // Property type label
+        // Property type filter label
         lblPropertyTypeFilter = new JLabel("Вид имот");
-        lblPropertyTypeFilter.setForeground(Color.BLACK);
         lblPropertyTypeFilter.setFont(new Font("Tahoma", Font.PLAIN, LABELS_FONT_SIZE));
-        lblPropertyTypeFilter.setBounds(290, LABELS_POSITION_Y, LABELS_WIDTH, LABELS_HEIGHT);
+        lblPropertyTypeFilter.setForeground(Color.BLACK);
+        lblPropertyTypeFilter.setBounds(410, LABELS_POSITION_Y, LABELS_WIDTH, LABELS_HEIGHT);
         getContentPane().add(lblPropertyTypeFilter);
 
-        // Property type text field
-        tfPropertyTypeFilter = new JTextField();
-        tfPropertyTypeFilter.setBounds(285, 79, 91, 19);
-        getContentPane().add(tfPropertyTypeFilter);
-        tfPropertyTypeFilter.setColumns(10);
+        // Property type filter combo box
+        cbPropertyTypeFilter = new JComboBox<String>();
+        cbPropertyTypeFilter.setBounds(403, 79, 115, 19);
+        cbPropertyTypeFilter.insertItemAt("", 0);
+        ResultSet rsType = Database.getPType();
+        try {
+            while (rsType.next()) {
+                cbPropertyTypeFilter.addItem(rsType.getString(1));
+            }
+        }
+        catch (Exception e) {
+            System.out.println(e);
+        }
+        cbPropertyTypeFilter.setSelectedIndex(-1);
+        getContentPane().add(cbPropertyTypeFilter);
 
-        // Minimum area label
-        lblMinAreaFilter = new JLabel("Min. m^2");
-        lblMinAreaFilter.setFont(new Font("Tahoma", Font.PLAIN, LABELS_FONT_SIZE));
-        lblMinAreaFilter.setForeground(Color.BLACK);
-        lblMinAreaFilter.setBounds(410, LABELS_POSITION_Y, LABELS_WIDTH, LABELS_HEIGHT);
-        getContentPane().add(lblMinAreaFilter);
-
-        // Minimum area text field
-        tfMinAreaFilter = new JTextField();
-        tfMinAreaFilter.setBounds(403, 79, 78, 19);
-        getContentPane().add(tfMinAreaFilter);
-        tfMinAreaFilter.setColumns(10);
-
-        // Max price label
+        // Max price filter label
         lblMaxPriceFilter = new JLabel("Max. цена");
         lblMaxPriceFilter.setFont(new Font("Tahoma", Font.PLAIN, LABELS_FONT_SIZE));
         lblMaxPriceFilter.setForeground(Color.BLACK);
-        lblMaxPriceFilter.setBounds(510, LABELS_POSITION_Y, LABELS_WIDTH, LABELS_HEIGHT);
+        lblMaxPriceFilter.setBounds(530, LABELS_POSITION_Y, LABELS_WIDTH, LABELS_HEIGHT);
         getContentPane().add(lblMaxPriceFilter);
         getContentPane().setLayout(null);
 
-        // Max price text field
+        // Max price filter text field
         tfMaxPriceFilter = new JTextField();
-        tfMaxPriceFilter.setBounds(502, 79, 91, 19);
+        tfMaxPriceFilter.setBounds(530, 79, 70, 19);
         getContentPane().add(tfMaxPriceFilter);
         tfMaxPriceFilter.setColumns(10);
 
-        //
-        // Add properties from database
-        //
-
-        ResultSet rs = Database.getProperties();
-        try {
-            while (rs.next()) {
-                row[0] = rs.getString(1);
-                System.out.println(row[0]);
-                row[1] = rs.getString(2);
-                row[2] = rs.getString(3);
-                row[3] = rs.getInt(4);
-
-                model.addRow(row);
-            }
-        } catch (Exception e) {System.out.println();}
 
         // Search button
         JButton btnFilterResults = new JButton("Търси");
@@ -181,7 +190,30 @@ public class MyListings extends JFrame implements ActionListener {
         btnFilterResults.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //TODO Filter listings
+                model.setRowCount(0);
+
+                String titleFilter = tfListingNameFilter.getText();
+                String cityFilter = cbCityNameFilter.getSelectedItem().toString();
+                String typeFilter = cbPropertyTypeFilter.getSelectedItem().toString();
+                String priceFilter = tfMaxPriceFilter.getText().toString();
+                int price = Integer.parseInt(priceFilter);
+
+                System.out.println(typeFilter);
+
+                ResultSet rs = Database.getFilteredProperties(titleFilter, cityFilter, typeFilter, price, Database.getCurrentUserId());
+
+                try {
+                    while (rs.next()) {
+                        row[0] = rs.getInt(1);
+                        row[1] = rs.getString(2);
+                        row[2] = rs.getString(3);
+                        row[3] = rs.getString(4);
+                        row[4] = rs.getInt(5);
+
+                        model.addRow(row);
+                    }
+                } catch (Exception exc) {System.out.println(exc);}
+
             }
         });
 
@@ -198,7 +230,7 @@ public class MyListings extends JFrame implements ActionListener {
         getContentPane().add(backButton);
 
         // View property button
-        btnViewProperty = new JButton("Преглед на имот");
+        btnViewProperty = new JButton("View listing");
         btnViewProperty.setHorizontalTextPosition(SwingConstants.CENTER);
         btnViewProperty.setAlignmentY(java.awt.Component.BOTTOM_ALIGNMENT);
         btnViewProperty.setAlignmentX(java.awt.Component.RIGHT_ALIGNMENT);
@@ -206,9 +238,36 @@ public class MyListings extends JFrame implements ActionListener {
         btnViewProperty.setBounds(527, 395, 196, 51);
         btnViewProperty.setBackground(new Color(139,0,139));
         btnViewProperty.setForeground(Color.WHITE);
+        btnViewProperty.addActionListener(this);
         getContentPane().add(btnViewProperty);
 
-        this.setTitle("Преглед на обяви˜");
+        // Add property button
+        addPropertyButton = new JButton("Add listing");
+        addPropertyButton.setHorizontalTextPosition(SwingConstants.CENTER);
+        addPropertyButton.setAlignmentY(java.awt.Component.BOTTOM_ALIGNMENT);
+        addPropertyButton.setAlignmentX(java.awt.Component.RIGHT_ALIGNMENT);
+        addPropertyButton.setFont(new Font("Tahoma", Font.PLAIN, 20));
+        addPropertyButton.setBounds(103, 395, 196, 51);
+        addPropertyButton.setBackground(new Color(139,0,139));
+        addPropertyButton.setForeground(Color.WHITE);
+        addPropertyButton.addActionListener(this);
+        getContentPane().add(addPropertyButton);
+
+        // Delete property button
+        deletePropertyButton = new JButton("Delete listing");
+        deletePropertyButton.setHorizontalTextPosition(SwingConstants.CENTER);
+        deletePropertyButton.setAlignmentY(java.awt.Component.BOTTOM_ALIGNMENT);
+        deletePropertyButton.setAlignmentX(java.awt.Component.RIGHT_ALIGNMENT);
+        deletePropertyButton.setFont(new Font("Tahoma", Font.PLAIN, 20));
+        deletePropertyButton.setBounds(315, 395, 196, 51);
+        deletePropertyButton.setBackground(new Color(139,0,139));
+        deletePropertyButton.setForeground(Color.WHITE);
+        deletePropertyButton.addActionListener(this);
+        getContentPane().add(deletePropertyButton);
+
+
+//        addPropertyButton
+        this.setTitle("Мойте обяви");
         this.setIconImage(appIcon.getImage());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.getContentPane().setBackground(new Color(248,240,255));
@@ -221,18 +280,48 @@ public class MyListings extends JFrame implements ActionListener {
         // TODO this.add(layeredPane);
     }
 
-    private void addRow() {
+    public void refreshUIData() {
+        // Add properties from database
+        ResultSet rs = Database.getProperties(Database.getCurrentUserId());
+        try {
+            while (rs.next()) {
+                row[0] = rs.getInt(1);
+                row[1] = rs.getString(2);
+                row[2] = rs.getString(3);
+                row[3] = rs.getString(4);
+                row[4] = rs.getInt(5);
+
+                model.addRow(row);
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
 
     }
 
+    public void onCloseInnit() {
+        model.setRowCount(0);
+    }
+
+
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource()== backButton) {
-
+        if (e.getSource() == backButton) {
+            framenavigator.showFrame(MainMenu.class);
         }
 
-        else if (e.getSource()== btnViewProperty) {
+        else if (e.getSource() == btnViewProperty) {
+            System.out.println(Database.getCurrentUserId());
+        }
 
+        else if (e.getSource() == addPropertyButton) {
+            framenavigator.showFrame(AddListing.class);
+        }
+
+        else if (e.getSource() == deletePropertyButton) {
+            Database.deleteProperty(Database.getCurrentListingId());
+            onCloseInnit();
+            refreshUIData();
         }
     }
 }

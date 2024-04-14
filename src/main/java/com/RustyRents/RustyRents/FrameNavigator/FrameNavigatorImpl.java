@@ -1,14 +1,17 @@
 package com.RustyRents.RustyRents.FrameNavigator;
 
-import com.RustyRents.RustyRents.Database.Database;
-import com.RustyRents.RustyRents.LogIn.SoftwareToken;
+import com.RustyRents.RustyRents.Listings.ListingDetails;
+import com.RustyRents.RustyRents.Listings.MyListings;
+import com.RustyRents.RustyRents.Listings.ViewListings;
+import com.RustyRents.RustyRents.Tokens.SoftwareToken;
 import com.RustyRents.RustyRents.MainMenu.MainMenu;
-import com.sun.tools.javac.Main;
+import com.RustyRents.RustyRents.Tokens.SoftwareTokenEmailPopUp;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 import javax.swing.*;
+import javax.swing.text.View;
 
 @Component
 public class FrameNavigatorImpl implements FrameNavigator, ApplicationContextAware {
@@ -28,13 +31,19 @@ public class FrameNavigatorImpl implements FrameNavigator, ApplicationContextAwa
     public void showFrame(Class<? extends JFrame> frameClass) {
         JFrame frame = applicationContext.getBean(frameClass);
         if (currentFrame != null) {
-            if (frame instanceof SoftwareToken) {
-                //do nothing
+            if (currentFrame instanceof ViewListings) {
+                ((ViewListings) currentFrame).onCloseInnit();
+                currentFrame.dispose();
+            }
+            else if (currentFrame instanceof MyListings) {
+                ((MyListings) currentFrame).onCloseInnit();
+                currentFrame.dispose();
             }
             else {
                 currentFrame.dispose();
             }
         }
+
 
         if (frame instanceof MainMenu) {
             currentFrame = frame;
@@ -42,11 +51,45 @@ public class FrameNavigatorImpl implements FrameNavigator, ApplicationContextAwa
             ((MainMenu) frame).refreshUIData();
             currentFrame.revalidate();
             currentFrame.repaint();
-            System.out.println("rat");
         }
+
+        else if (frame instanceof ViewListings) {
+            currentFrame = frame;
+            currentFrame.setVisible(true);
+            ((ViewListings) frame).refreshUIData();
+            currentFrame.revalidate();
+            currentFrame.repaint();
+        }
+
+        else if (frame instanceof MyListings) {
+            currentFrame = frame;
+            currentFrame.setVisible(true);
+            ((MyListings) frame).refreshUIData();
+            currentFrame.revalidate();
+            currentFrame.repaint();
+        }
+
+        else if (frame instanceof ListingDetails) {
+            currentFrame = frame;
+            currentFrame.setVisible(true);
+            ((ListingDetails) frame).refreshUIData();
+            currentFrame.revalidate();
+            currentFrame.repaint();
+        }
+
+        else if (frame instanceof SoftwareToken && currentFrame instanceof SoftwareTokenEmailPopUp) {
+            ((SoftwareToken) frame).setLoggedUI();
+            currentFrame = frame;
+            currentFrame.setVisible(true);
+            currentFrame.revalidate();
+            currentFrame.repaint();
+        }
+
         else {
             currentFrame = frame;
             currentFrame.setVisible(true);
+            currentFrame.revalidate();
+            currentFrame.repaint();
         }
         // TODO : currentFrame.initChanges() - Всички текстове и детайли, които се взимат от Database класът да се извикват с тази функция, за да се избегне NULL.
     }

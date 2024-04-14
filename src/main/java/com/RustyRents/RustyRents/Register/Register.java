@@ -26,19 +26,15 @@ public class Register extends JFrame implements ActionListener {
     JPanel thirdPanel=new JPanel();
     CardLayout cardLayout = new CardLayout();
 
-    JButton customerButton=new JButton("Renter");
-    JButton landlordButton=new JButton("Landlord");
     JButton backToLogInScreenButton=new JButton("Back to Log in");
     JButton nextStepButton=new JButton("Next");
     JButton backButton=new JButton("Back");
-    JButton finalNextButton=new JButton("Next");
 
-    JComboBox customerStatusComboBox;
-    JComboBox preferredLocationComboBox;
+    JComboBox secretQuestionCB;
 
-    JTextField usernameTextField;
-    JPasswordField passwordTextField;
-    JPasswordField confirmPasswordTextField;
+    JTextField usernameTextField, secretAnswerTextField;
+    JPasswordField passwordTextField, confirmPasswordTextField;
+
     JTextField emailTextField;
 
     private final FrameNavigator frameNavigator;
@@ -54,27 +50,7 @@ public class Register extends JFrame implements ActionListener {
 
         registrationIcon=new ImageIcon(newing);
         secondPanelLogo=new ImageIcon(newing);
-        thirdPanelLogo=new ImageIcon(newing);
 
-        panelContainer.setLayout(cardLayout);
-        panelContainer.add(secondPanel,"1");
-        cardLayout.show(panelContainer,"1");
-
-        //firstPanel
-        firstPanel.setLayout(new BorderLayout());
-        JLabel headerImage= new JLabel(registrationIcon);
-        headerImage.setPreferredSize(new Dimension(100,100));
-        JLabel accountOptionLabel=new JLabel("Choose your preferred option");
-
-        customerButton.setForeground(Color.white);
-        customerButton.setFocusable(false);
-        customerButton.setBackground(new Color(139,0,139));
-        customerButton.addActionListener(this);
-
-        landlordButton.setForeground(Color.white);
-        landlordButton.setFocusable(false);
-        landlordButton.setBackground(new Color(139,0,139));
-        landlordButton.addActionListener(this);
 
         backToLogInScreenButton.setForeground(Color.white);
         backToLogInScreenButton.setFocusable(false);
@@ -95,17 +71,28 @@ public class Register extends JFrame implements ActionListener {
         JLabel passwordLabel=new JLabel("Password:");
         JLabel confirmPasswordLabel=new JLabel("Confirm password:");
         JLabel emailLabel=new JLabel("E-mail:");
+        JLabel secretQuestionLabel = new JLabel("Secret question:");
+        JLabel secretAnswerLabel = new JLabel("Answer:");
 
         usernameTextField= new JTextField();
-        usernameTextField.setPreferredSize(new Dimension(70,20));
+        usernameTextField.setPreferredSize(new Dimension(120,20));
+        secretAnswerTextField = new JTextField();
+        secretAnswerTextField.setPreferredSize(new Dimension(150,20));
         passwordTextField=new JPasswordField();
-        passwordTextField.setPreferredSize(new Dimension(70,20));
+        passwordTextField.setPreferredSize(new Dimension(100,20));
         passwordTextField.setEchoChar('*');
         confirmPasswordTextField=new JPasswordField();
-        confirmPasswordTextField.setPreferredSize(new Dimension(70,20));
+        confirmPasswordTextField.setPreferredSize(new Dimension(100,20));
         confirmPasswordTextField.setEchoChar('*');
         emailTextField=new JTextField();
-        emailTextField.setPreferredSize(new Dimension(70,20));
+        emailTextField.setPreferredSize(new Dimension(150,20));
+        secretQuestionCB = new JComboBox();
+        secretQuestionCB.setPreferredSize(new Dimension(230,20));
+        secretQuestionCB.addItem("Where was one of your parents born?");
+        secretQuestionCB.addItem("What's the name of your first pet?");
+        secretQuestionCB.addItem("What's your childhood nickname??");
+        secretQuestionCB.addItem("What's the name of your first girlfriend?");
+
 
         nextStepButton.addActionListener(this);
         nextStepButton.setForeground(Color.white);
@@ -130,6 +117,10 @@ public class Register extends JFrame implements ActionListener {
         subPanelForSecondPanel2.add(confirmPasswordTextField);
         subPanelForSecondPanel2.add(emailLabel);
         subPanelForSecondPanel2.add(emailTextField);;
+       // subPanelForSecondPanel2.add(secretQuestionLabel);
+        subPanelForSecondPanel2.add(secretQuestionCB);
+        subPanelForSecondPanel2.add(secretAnswerLabel);
+        subPanelForSecondPanel2.add(secretAnswerTextField);
 
         subPanelForSecondPanel3.add(nextStepButton);
         subPanelForSecondPanel3.add(backButton);
@@ -140,12 +131,12 @@ public class Register extends JFrame implements ActionListener {
 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setIconImage(appIcon.getImage());
-        this.setSize(500,500);
+        this.setSize(250,400);
         this.setLocationRelativeTo(null);
-        this.setLayout(new BorderLayout());
+     //   this.setLayout(new BorderLayout());
         this.setResizable(false);
-        this.add(panelContainer);
-        this.pack();
+        this.add(secondPanel);
+        //this.pack();
     }
 
 
@@ -163,7 +154,7 @@ public class Register extends JFrame implements ActionListener {
         panel3.setBackground(new Color(248,240,255));
 
         panel1.setPreferredSize(new Dimension(200,130));
-        panel2.setPreferredSize(new Dimension(160,150));
+        panel2.setPreferredSize(new Dimension(200,150));
         panel3.setPreferredSize(new Dimension(200,50));
     }
 
@@ -182,7 +173,9 @@ public class Register extends JFrame implements ActionListener {
             if (usernameTextField.getText().equals("")
                     || passwordTextField.getPassword().length == 0
                     || confirmPasswordTextField.getPassword().length == 0
-                    || emailTextField.getText().equals("")) {
+                    || emailTextField.getText().equals("")
+                    || secretAnswerTextField.getText().equals("")
+                    || secretQuestionCB.getSelectedItem().toString().equals("")) {
                 // TODO SWING : Label "Има непопълнени полета"
                 System.out.println("Empty fields.");
             }
@@ -202,7 +195,9 @@ public class Register extends JFrame implements ActionListener {
                 System.out.println("Email is already taken.");
             }
             else {
-                Database.addNewUser(usernameTextField.getText(), new String(passwordTextField.getPassword()), emailTextField.getText());
+                Database.addNewUser(usernameTextField.getText(), new String(passwordTextField.getPassword()), emailTextField.getText(),
+                        secretQuestionCB.getSelectedItem().toString(),secretAnswerTextField.getText());
+                System.out.println("Question: " + secretQuestionCB.getSelectedItem().toString() + ", Answer: " + secretAnswerTextField.getText());
                 frameNavigator.showFrame(LogIn.class);
             }
         }

@@ -9,7 +9,8 @@ public class Database {
 
     private static int currentUserId = 0;
 
-    private static int currentListingId;
+    private static int currentSTUserID = 0;
+    private static int currentListingId = 0;
 
     private static String currentGeneratedCode;
     private static Statement statement = null;
@@ -46,7 +47,23 @@ public class Database {
 
     }
 
-    public static void addNewUser(String username, String password, String email) {
+    private static void storeNewAnswerQuestion(int userId, String question, String answer) {
+        values = "'" + userId + "' , '" + question + "' , '" + answer + "'";
+        query = "INSERT INTO secretquestion VALUES (" + values + ")";
+
+        System.out.println("Database.storeNewAnswerQuestion : Query to insert secret question given userid, question and answer.");
+        System.out.println(question instanceof String);
+        System.out.println(answer instanceof String);
+        System.out.println(query);
+
+        try {
+
+            statement.execute("INSERT INTO secretquestion VALUES (" + "'" + userId + "' , '" + question + "' , '" + answer + "'" + ")");
+
+        } catch(Exception e) {System.out.println(e);}
+    }
+
+    public static void addNewUser(String username, String password, String email, String question, String answer) {
 
         int newUserId;
         String test;
@@ -65,6 +82,10 @@ public class Database {
                 rs.next();
                 newUserId = rs.getInt(1);
                 storeNewLogin(newUserId, password);
+                question = question.replace("'", "");
+                answer = answer.replace("'", "");
+                storeNewAnswerQuestion(newUserId, question, answer);
+
             }
         } catch(Exception e) {System.out.println(e);}
 
@@ -286,10 +307,6 @@ public class Database {
     }
 
     public static void generateEmailCode() {
-        currentGeneratedCode = RandomStringUtils.randomAlphanumeric(10);
-
-        values = "'" + currentUserId + "' , '" + currentGeneratedCode + "'";
-        query = "INSERT INTO emailcodes VALUES (" + values + ")";
 
         System.out.println("Database.generateEmailCode: Query to insert an email code.");
         System.out.println(query);
@@ -299,6 +316,7 @@ public class Database {
                 System.out.println("Database.generateEmailCode: Email code is already generated.");
             }
             else if (!checkIfEmailCodeIsAlreadyGenerated()) {
+                currentGeneratedCode = RandomStringUtils.randomAlphanumeric(10);
                 System.out.println("Database.generateEmailcode: Generating email code.");
                 statement.execute("INSERT INTO emailcodes VALUES ('" + currentUserId + "' , '" + currentGeneratedCode + "')");
             }
@@ -449,7 +467,7 @@ public class Database {
     public static ResultSet getProperties() {
 
         String Select = "SELECT listing_id, title, city, listing_type, price";
-        String From = "FROM Listings";
+        String From = "FROM listings";
         query = Select + " " + From;
 
         ResultSet rs = null;
@@ -464,12 +482,84 @@ public class Database {
 
     }
 
+    public static ResultSet getAllProperties(int listingId) {
+
+        String Select = "SELECT listing_id, title, city, listing_type, price, neighbourhood, street, street_number, floor, room_number, q_size, phone_number";
+        String From = "FROM listings";
+        String Where = "WHERE listing_id = '" + listingId + "'";
+        query = Select + " " + From + " " + Where;
+
+        ResultSet rs = null;
+
+        try {
+
+            rs = statement.executeQuery(query);
+
+        } catch (Exception e) {System.out.println(e);}
+
+        return rs;
+
+    }
+
+    public static ResultSet getProperties(int userId) {
+
+        String Select = "SELECT listing_id, title, city, listing_type, price";
+        String From = "FROM listings";
+        String Where = "WHERE user_id = '" + userId + "'";
+        query = Select + " " + From + " " + Where;
+
+        ResultSet rs = null;
+
+        try {
+            rs = statement.executeQuery(query);
+            System.out.println(query);
+
+        } catch (Exception e) {System.out.println(e);};
+
+        return rs;
+
+    }
+
+    public static void deleteProperty(int listingId) {
+
+        query = "DELETE FROM listings WHERE listing_id = '" + listingId + "'";
+
+        try {
+            statement.execute(query);
+            System.out.println(query);
+
+        }
+        catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
 
     public static ResultSet getFilteredProperties(String title, String city, String type, int price) {
 
         String Select = "SELECT listing_id, title, city, listing_type, price";
         String From = "FROM Listings";
         String Where = "WHERE title = '" + title + "' AND city = '" + city + "' AND listing_type = '" + type + "' AND price <= " + price;
+
+        query = Select + " " + From + " " + Where;
+
+        ResultSet rs = null;
+
+        try {
+
+            rs = statement.executeQuery(query);
+
+        } catch (Exception e) {System.out.println(e);}
+
+        return rs;
+
+    }
+
+    public static ResultSet getFilteredProperties(String title, String city, String type, int price, int currentUserId) {
+
+        String Select = "SELECT listing_id, title, city, listing_type, price";
+        String From = "FROM Listings";
+        String Where = "WHERE title = '" + title + "' AND city = '" + city + "' AND listing_type = '" + type + "' AND price <= " + price + "' AND user_id = '" + currentUserId;
 
         query = Select + " " + From + " " + Where;
 
@@ -708,5 +798,41 @@ public class Database {
         }
 
         return null;
+    }
+
+    public static void insertNewProperty(String title, String city, String listing_type, String price, String neighbourhood,
+                                         String street, String streetNumber, String floor, String roomNumber, String qSize, String phoneNumber) {
+        values = "NULL, '" + title + "' , '" + city + "' , '" + listing_type + "' , '" + price + "' , '" + neighbourhood + "' , '" + street + "' , '" + streetNumber + "' , '" + floor + "' , '" + roomNumber + "' , '" + qSize + "' , '" + phoneNumber + "' , '" + currentUserId + "'";
+        query = "INSERT INTO listings VALUES (" + values + ")";
+
+        try {
+            System.out.println("Database.insertNewProperty : Query to insert new property.");
+            System.out.println(query);
+
+            statement.execute(query);
+
+            ResultSet rs = statement.executeQuery("SELECT MAX(listing_id) FROM listings");
+            rs.next();
+            currentListingId = rs.getInt(1);
+        }
+        catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    public static String injectionProtection(String input) {
+
+        //Symbol whitelist
+        input = input.replaceAll("[^a-zA-Z0-9!_@#$%^&*]", " ");
+        //Remove ' to avoid query errors.
+        input = input.replace("'", "");
+        //Remove possible SQL injection triggers
+        input = input.replaceAll("union", "");
+        input = input.replaceAll("select", "");
+        input = input.replaceAll("drop", "");
+        input = input.replaceAll("delete", "");
+        input = input.replaceAll("--", "");
+
+        return input;
     }
 }

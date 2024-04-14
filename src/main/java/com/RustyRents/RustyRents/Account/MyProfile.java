@@ -102,7 +102,7 @@ public class MyProfile extends JFrame implements ActionListener {
         }
 
         else if (e.getSource() == backButton) {
-
+            frameNavigator.showFrame(MainMenu.class);
         }
     }
 }

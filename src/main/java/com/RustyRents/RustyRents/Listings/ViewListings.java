@@ -24,9 +24,6 @@ import java.sql.ResultSet;
 public class ViewListings extends JFrame implements ActionListener {
 
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 1L;
     JLayeredPane layeredPane;
     JTable table;
@@ -179,22 +176,6 @@ public class ViewListings extends JFrame implements ActionListener {
         getContentPane().add(tfMaxPriceFilter);
         tfMaxPriceFilter.setColumns(10);
 
-        //
-        // Add properties from database
-        //
-
-        ResultSet rs = Database.getProperties();
-        try {
-            while (rs.next()) {
-                row[0] = rs.getInt(1);
-                row[1] = rs.getString(2);
-                row[2] = rs.getString(3);
-                row[3] = rs.getString(4);
-                row[4] = rs.getInt(5);
-
-                model.addRow(row);
-            }
-        } catch (Exception e) {System.out.println(e);}
 
         // Search button
         JButton btnFilterResults = new JButton("Търси");
@@ -276,8 +257,25 @@ public class ViewListings extends JFrame implements ActionListener {
         // TODO this.add(layeredPane);
     }
 
-    private void addRow() {
+    public void refreshUIData() {
+        // Add properties from database
+        ResultSet rs = Database.getProperties();
+        try {
+            while (rs.next()) {
+                row[0] = rs.getInt(1);
+                row[1] = rs.getString(2);
+                row[2] = rs.getString(3);
+                row[3] = rs.getString(4);
+                row[4] = rs.getInt(5);
 
+                model.addRow(row);
+            }
+        } catch (Exception e) {System.out.println(e);}
+
+    }
+
+    public void onCloseInnit() {
+        model.setRowCount(0);
     }
 
     @Override
@@ -287,12 +285,7 @@ public class ViewListings extends JFrame implements ActionListener {
         }
 
         else if (e.getSource()== btnViewProperty) {
-            if (Database.getCurrentListingId() == 0) {
-                System.out.println("iska ti sa");
-            }
-            else {
-
-            }
+            framenavigator.showFrame(ListingDetails.class);
         }
 
     }

@@ -118,7 +118,7 @@ public class MainMenu extends JFrame implements ActionListener{
             framenavigator.showFrame(Options.class);
         }
         else if (e.getSource()== myListingsButton) {
-           // framenavigator.showFrame(ViewListings.class);
+           framenavigator.showFrame(MyListings.class);
         }
         else if (e.getSource()== viewListingsButon) {
             framenavigator.showFrame(ViewListings.class);

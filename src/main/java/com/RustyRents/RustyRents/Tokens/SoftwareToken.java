@@ -1,10 +1,13 @@
-package com.RustyRents.RustyRents.LogIn;
+package com.RustyRents.RustyRents.Tokens;
 
 import com.RustyRents.RustyRents.Database.Database;
 import com.RustyRents.RustyRents.FrameNavigator.FrameNavigator;
+import com.RustyRents.RustyRents.Services.EmailSenderService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -23,10 +26,13 @@ public class SoftwareToken extends JFrame implements ActionListener {
 
     private final FrameNavigator frameNavigator;
 
+    @Autowired
+    private EmailSenderService emailSend;
     private static final String CREDENTIALS_FILE = "credentials.txt"; // File to store credentials
     private static final String SECRET_KEY = "YourSecretKey123"; // 16 characters for AES-128, 24 characters for AES-192, 32 characters for AES-256
     private static final String INIT_VECTOR = "YourInitVector12"; // 16 bytes IV for AES
 
+    int originalUserID;
     Timer timer;
     ImageIcon logo;
     JLayeredPane loggedPane = new JLayeredPane();
@@ -70,6 +76,8 @@ public class SoftwareToken extends JFrame implements ActionListener {
         logOutButton = new JButton("Log out");
         logOutButton.setBounds(90, 150, 100, 40);
         logOutButton.addActionListener(this);
+        logOutButton.setBackground(new Color(139,0,139));
+        logOutButton.setForeground(Color.WHITE);
         loggedPane.add(logOutButton, 4);
 
         usernameLabel = new JLabel("Username: ");
@@ -89,6 +97,8 @@ public class SoftwareToken extends JFrame implements ActionListener {
         logInButton = new JButton("Log in");
         logInButton.setBounds(90, 150, 100, 40);
         logInButton.addActionListener(this);
+        logInButton.setBackground(new Color(139,0,139));
+        logInButton.setForeground(Color.WHITE);
         notLoggedPane.add(logInButton);
 
 
@@ -200,24 +210,32 @@ public class SoftwareToken extends JFrame implements ActionListener {
         return null;
     }
 
+    public void setLoggedUI() {
+        Database.setCurrentUserId(originalUserID);
+        saveCredentials(usernameTF.getText(), new String(passwordPF.getPassword()));
+        String[] credentials = readCredentials();
+        String username = credentials[0];
+        String password = credentials[1];
+        System.out.println("Username: " + username);
+        System.out.println("Password: " + password);
+        this.remove(notLoggedPane);
+        this.add(loggedPane);
+        this.revalidate();
+        this.repaint();
+        Database.generateSoftwareCode();
+        timer.start();
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
 
         if (e.getSource()==logInButton) {
             if (Database.isValidLogin(usernameTF.getText(), new String(passwordPF.getPassword()))) {
+                originalUserID = Database.getCurrentUserId();
                 Database.setCurrentUserId(Database.getUserId(usernameTF.getText()));
-                saveCredentials(usernameTF.getText(), new String(passwordPF.getPassword()));
-                String[] credentials = readCredentials();
-                String username = credentials[0];
-                String password = credentials[1];
-                System.out.println("Username: " + username);
-                System.out.println("Password: " + password);
-                this.remove(notLoggedPane);
-                this.add(loggedPane);
-                this.revalidate();
-                this.repaint();
-                Database.generateSoftwareCode();
-                timer.start();
+                Database.generateEmailCode();
+                emailSend.sendEmail("bdaskalov02@gmail.com", "Rusty Rents Authentication Code", Database.getCurrentGeneratedCode());
+                frameNavigator.showFrame(SoftwareTokenEmailPopUp.class);
             }
         }
 
