@@ -196,7 +196,6 @@ package com.RustyRents.RustyRents.Listings;
 
 import com.RustyRents.RustyRents.Database.Database;
 import com.RustyRents.RustyRents.FrameNavigator.FrameNavigator;
-import com.RustyRents.RustyRents.Tokens.SoftwareTokenEmailPopUp;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -204,20 +203,18 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.lang.reflect.Field;
 import java.io.File;
 import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.SQLOutput;
 
 @Component
 public class ListingDetails extends JFrame implements ActionListener {
 
     private final FrameNavigator frameNavigator;
-    private int amountOfPics = 0;
+    private int currentPhoto = 0;
     private String[] imagePath;
+
+    private ResultSet dbImages, rs;
 
     JLabel titleLabel, cityLabel, listingTypeLabel, priceLabel, neighbourhoodLabel, streetLabel, streetNumberLabel,
             floorLabel, roomNumberLabel, qSizeLabel, phoneNumberLabel, imageLabel1, imageLabel2, imageLabel3, imageLabel4,
@@ -236,7 +233,7 @@ public class ListingDetails extends JFrame implements ActionListener {
 
     File selectedFile;
 
-    JButton backButton, secondBackButton, nextButton, finishButton, selectImageButton;
+    JButton backButton, secondBackButton, nextButton, nextImage, previousImage;
 
     JFileChooser fileChooser;
 
@@ -255,19 +252,8 @@ public class ListingDetails extends JFrame implements ActionListener {
     public ListingDetails(FrameNavigator frameNavigator){
         this.frameNavigator = frameNavigator;
 
-        try {
-            innitSubPanels();
-            innitPanels();
-            System.out.println("YEEEEEEEEEEEEEEES");
-        }
-        catch (Exception e) {
-            //System.out.println(e);
-            System.out.println("ERROOOOOORRRRRRRRRRRRRRRRRRRR");
-        }
-
         innitSubPanels();
         innitPanels();
-        System.out.println("YEEEEEEEEEEEEEEES");
 
         this.setTitle("Детайли на обява");
         //  this.setIconImage(appIcon.getImage());
@@ -455,22 +441,12 @@ public class ListingDetails extends JFrame implements ActionListener {
         firstPanel.add(subPanel11_1);
         firstPanel.add(subPanel12_1);
 
-        fileChooser = new JFileChooser();
-        fileNameExtensionFilter = new FileNameExtensionFilter("Image Files", "jpg", "png");
-        fileChooser.setFileFilter(fileNameExtensionFilter);
-
         secondPanel = new JLayeredPane();
         secondPanel.setPreferredSize(new Dimension(550,550));
         secondPanel.setLayout(new BoxLayout(secondPanel, BoxLayout.Y_AXIS));
 
-        selectImageButton = new JButton("Select Image");
-        selectImageButton.addActionListener(this);
-        selectImageButton.setBackground(new Color(139,0,139));
-        selectImageButton.setForeground(Color.white);
-
-
         ImagesSubPanel = new JPanel();
-        ImagesSubPanel.setLayout(new GridLayout(3, 3,0,0));
+       // ImagesSubPanel.setLayout(new GridLayout(3, 3,0,0));
 
         images = new ImageIcon[9];
 
@@ -482,246 +458,21 @@ public class ListingDetails extends JFrame implements ActionListener {
 
 
         imageLabel1 = new JLabel();
-        imageLabel1.setIcon(defaultIcon);
-        imageLabel1.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                Container parent = imageLabel1.getParent();
-                System.out.println(parent);
-                if (!(imageLabel1.getIcon() == defaultIcon) && (amountOfPics == 1)) {
-                    System.out.println("1");
-                    imageLabel1.setIcon(defaultIcon);
-                    System.out.println(parent);
-                    parent.revalidate();
-                    parent.repaint();
-                    amountOfPics--;
-                    imagePath[1] = null;
-                    System.out.println(amountOfPics);
-                }
-                else {
-                    System.out.println("2");
-                    System.out.println(amountOfPics);
-                }
-            }
-        });
         ImagesSubPanel.add(imageLabel1);
-
-        imageLabel2 = new JLabel();
-        imageLabel2.setIcon(defaultIcon);
-        imageLabel2.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                Container parent = imageLabel2.getParent();
-                System.out.println(parent);
-                if (!(imageLabel2.getIcon() == defaultIcon) && (amountOfPics == 2)) {
-                    System.out.println("1");
-                    imageLabel2.setIcon(defaultIcon);
-                    System.out.println(parent);
-                    parent.revalidate();
-                    parent.repaint();
-                    amountOfPics--;
-                    imagePath[2] = null;
-                    System.out.println(amountOfPics);
-                }
-                else {
-                    System.out.println("2");
-                    System.out.println(amountOfPics);
-                }
-            }
-        });
-        ImagesSubPanel.add(imageLabel2);
-
-        imageLabel3 = new JLabel();
-        imageLabel3.setIcon(defaultIcon);
-        imageLabel3.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                Container parent = imageLabel3.getParent();
-                System.out.println(parent);
-                if (!(imageLabel3.getIcon() == defaultIcon) && (amountOfPics == 3)) {
-                    System.out.println("1");
-                    imageLabel3.setIcon(defaultIcon);
-                    System.out.println(parent);
-                    parent.revalidate();
-                    parent.repaint();
-                    amountOfPics--;
-                    imagePath[3] = null;
-                    System.out.println(amountOfPics);
-                }
-                else {
-                    System.out.println("2");
-                    System.out.println(amountOfPics);
-                }
-            }
-        });
-        ImagesSubPanel.add(imageLabel3);
-
-        imageLabel4 = new JLabel();
-        imageLabel4.setIcon(defaultIcon);
-        imageLabel4.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                Container parent = imageLabel4.getParent();
-                System.out.println(parent);
-                if (!(imageLabel4.getIcon() == defaultIcon) && (amountOfPics == 4)) {
-                    System.out.println("1");
-                    imageLabel4.setIcon(defaultIcon);
-                    System.out.println(parent);
-                    parent.revalidate();
-                    parent.repaint();
-                    amountOfPics--;
-                    imagePath[4] = null;
-                    System.out.println(amountOfPics);
-                }
-                else {
-                    System.out.println("2");
-                    System.out.println(amountOfPics);
-                }
-            }
-        });
-        ImagesSubPanel.add(imageLabel4);
-
-        imageLabel5 = new JLabel();
-        imageLabel5.setIcon(defaultIcon);
-        imageLabel5.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                Container parent = imageLabel5.getParent();
-                System.out.println(parent);
-                if (!(imageLabel5.getIcon() == defaultIcon) && (amountOfPics == 5)) {
-                    System.out.println("1");
-                    imageLabel5.setIcon(defaultIcon);
-                    System.out.println(parent);
-                    parent.revalidate();
-                    parent.repaint();
-                    amountOfPics--;
-                    imagePath[5] = null;
-                    System.out.println(amountOfPics);
-                }
-                else {
-                    System.out.println("2");
-                    System.out.println(amountOfPics);
-                }
-            }
-        });
-        ImagesSubPanel.add(imageLabel5);
-
-        imageLabel6 = new JLabel();
-        imageLabel6.setIcon(defaultIcon);
-        imageLabel6.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                Container parent = imageLabel6.getParent();
-                System.out.println(parent);
-                if (!(imageLabel6.getIcon() == defaultIcon) && (amountOfPics == 6)) {
-                    System.out.println("1");
-                    imageLabel6.setIcon(defaultIcon);
-                    System.out.println(parent);
-                    parent.revalidate();
-                    parent.repaint();
-                    amountOfPics--;
-                    imagePath[6] = null;
-                    System.out.println(amountOfPics);
-                }
-                else {
-                    System.out.println("2");
-                    System.out.println(amountOfPics);
-                }
-            }
-        });
-        ImagesSubPanel.add(imageLabel6);
-
-        imageLabel7 = new JLabel();
-        imageLabel7.setIcon(defaultIcon);
-        imageLabel7.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                Container parent = imageLabel7.getParent();
-                System.out.println(parent);
-                if (!(imageLabel7.getIcon() == defaultIcon) && (amountOfPics == 7)) {
-                    System.out.println("1");
-                    imageLabel7.setIcon(defaultIcon);
-                    System.out.println(parent);
-                    parent.revalidate();
-                    parent.repaint();
-                    amountOfPics--;
-                    imagePath[7] = null;
-                    System.out.println(amountOfPics);
-                }
-                else {
-                    System.out.println("2");
-                    System.out.println(amountOfPics);
-                }
-            }
-        });
-        ImagesSubPanel.add(imageLabel7);
-
-        imageLabel8 = new JLabel();
-        imageLabel8.setIcon(defaultIcon);
-        imageLabel8.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                Container parent = imageLabel8.getParent();
-                System.out.println(parent);
-                if (!(imageLabel8.getIcon() == defaultIcon) && (amountOfPics == 8)) {
-                    System.out.println("1");
-                    imageLabel8.setIcon(defaultIcon);
-                    System.out.println(parent);
-                    parent.revalidate();
-                    parent.repaint();
-                    amountOfPics--;
-                    imagePath[8] = null;
-                    System.out.println(amountOfPics);
-                }
-                else {
-                    System.out.println("2");
-                    System.out.println(amountOfPics);
-                }
-            }
-        });
-        ImagesSubPanel.add(imageLabel8);
-
-        imageLabel9 = new JLabel();
-        imageLabel9.setIcon(defaultIcon);
-        imageLabel9.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                Container parent = imageLabel9.getParent();
-                System.out.println(parent);
-                if (!(imageLabel9.getIcon() == defaultIcon) && (amountOfPics == 9)) {
-                    System.out.println("1");
-                    imageLabel9.setIcon(defaultIcon);
-                    System.out.println(parent);
-                    parent.revalidate();
-                    parent.repaint();
-                    amountOfPics--;
-                    imagePath[9] = null;
-                    System.out.println(amountOfPics);
-                }
-                else {
-                    System.out.println("2");
-                    System.out.println(amountOfPics);
-                }
-            }
-        });
-        ImagesSubPanel.add(imageLabel9);
-
-        imageLabels[0] = imageLabel1;
-        imageLabels[1] = imageLabel2;
-        imageLabels[2] = imageLabel3;
-        imageLabels[3] = imageLabel4;
-        imageLabels[4] = imageLabel5;
-        imageLabels[5] = imageLabel6;
-        imageLabels[6] = imageLabel7;
-        imageLabels[7] = imageLabel8;
-        imageLabels[8] = imageLabel9;
-
         secondPanel.add(ImagesSubPanel);
 
-        finishButton = new JButton("Finish");
-        finishButton.addActionListener(this);
-        finishButton.setBackground(new Color(139,0,139));
-        finishButton.setForeground(Color.white);
+
+
+        nextImage = new JButton("Next image");
+        nextImage.addActionListener(this);
+        nextImage.setBackground(new Color(139,0,139));
+        nextImage.setForeground(Color.white);
+
+        previousImage = new JButton("Previous Image");
+        previousImage.addActionListener(this);
+        previousImage.setBackground(new Color(139,0,139));
+        previousImage.setForeground(Color.white);
+
         secondBackButton = new JButton("Back");
         secondBackButton.addActionListener(this);
         secondBackButton.setBackground(new Color(139,0,139));
@@ -729,10 +480,11 @@ public class ListingDetails extends JFrame implements ActionListener {
 
         buttonsSubPanel = new JPanel();
         buttonsSubPanel.add(secondBackButton);
-        buttonsSubPanel.add(selectImageButton);
-        buttonsSubPanel.add(finishButton);
+        buttonsSubPanel.add(previousImage);
+        buttonsSubPanel.add(nextImage);
 
         secondPanel.add(buttonsSubPanel);
+
 
     }
 
@@ -752,7 +504,7 @@ public class ListingDetails extends JFrame implements ActionListener {
 
     public void refreshUIData() {
         try {
-            ResultSet rs = Database.getAllProperties(Database.getCurrentListingId());
+            rs = Database.getAllProperties(Database.getCurrentListingId());
 
             rs.next();
             
@@ -768,7 +520,6 @@ public class ListingDetails extends JFrame implements ActionListener {
             qSizeLabelOutput.setText(rs.getString(10));
             phoneNumberLabelOutput.setText(rs.getString(11));
 
-
             System.out.println(rs.getString(1));
             System.out.println(rs.getString(2));
             System.out.println(rs.getString(3));
@@ -780,11 +531,50 @@ public class ListingDetails extends JFrame implements ActionListener {
             System.out.println(rs.getString(9));
             System.out.println(rs.getString(10));
             System.out.println(rs.getString(11));
+
+            rs.close();
+
         }
         catch (Exception e) {
             System.out.println(e);
         }
 
+        try {
+            dbImages = Database.getListingImage();
+            for (int i = 0; i < imagePath.length; i++) {
+                if (dbImages.next()) {
+                    System.out.println(dbImages.getString(1));
+                    imagePath[i] = Database.imagePathDBOutput(dbImages.getString(1));
+                    System.out.println(i);
+                }
+            }
+            for (int i = 0; i < images.length; i++) {
+                if (imagePath[i] != null) {
+                    images[i] = new ImageIcon(imagePath[i]);
+                    imageScale = images[i].getImage().getScaledInstance(400, 400, Image.SCALE_SMOOTH);
+                    images[i] = new ImageIcon(imageScale);
+                    System.out.println(images[i].getImage().toString());
+                }
+            }
+
+            imageLabel1.setIcon(images[0]);
+        }
+        catch (Exception e) {
+            System.out.println(e);
+        }
+
+    }
+
+    private int getPhotosCount() {
+        int result = 0;
+
+        for (int i = 0; i < images.length; i++) {
+            if (images[i] != null) {
+                result++;
+            }
+        }
+
+        return result;
     }
 
     @Override
@@ -811,38 +601,55 @@ public class ListingDetails extends JFrame implements ActionListener {
             this.repaint();
         }
 
-        else if (e.getSource() == finishButton) {
-            frameNavigator.showFrame(MyListings.class);
-            Database.insertNewProperty(Database.injectionProtection(titleInput.getText()), Database.injectionProtection(cityInput.getText()),
-                    Database.injectionProtection(listingTypeInput.getText()), Database.injectionProtection(priceInput.getText()), Database.injectionProtection(neighbourhoodInput.getText()),
-                    Database.injectionProtection(streetInput.getText()), Database.injectionProtection(streetNumberInput.getText()), Database.injectionProtection(floorInput.getText()),
-                    Database.injectionProtection(roomNumberInput.getText()), Database.injectionProtection(qSizeInput.getText()), Database.injectionProtection(phoneNumberInput.getText()));
-            this.remove(secondPanel);
-            this.add(firstPanel);
-            clearTextFields();
-            this.pack();
+        else if (e.getSource() == nextImage) {
+            if (currentPhoto < getPhotosCount()) {
+                if (images[currentPhoto] == null) {
+                    currentPhoto = 0;
+                    imageLabel1.setIcon(images[currentPhoto]);
+                }
+                else {
+                    if (images[currentPhoto + 1] == null) {
+                        currentPhoto = 0;
+                    }
+                    else {
+                        currentPhoto++;
+                    }
+
+                    imageLabel1.setIcon(images[currentPhoto]);
+                }
+            }
+            else {
+                currentPhoto = 0;
+                imageLabel1.setIcon(images[currentPhoto]);
+            }
             this.revalidate();
             this.repaint();
         }
 
-        else if (e.getSource() == selectImageButton) {
-            int result = fileChooser.showOpenDialog(null);
+        else if (e.getSource() == previousImage) {
 
-            if (result == fileChooser.APPROVE_OPTION) {
-                selectedFile = new File(fileChooser.getSelectedFile().getAbsolutePath());
+                if (currentPhoto > 0 && currentPhoto < getPhotosCount()) {
+                    if (images[currentPhoto] == null) {
+                        currentPhoto = getPhotosCount() - 1;
+                        imageLabel1.setIcon(images[currentPhoto]);
+                    }
+                    else {
+                        if (images[currentPhoto - 1] == null) {
+                            currentPhoto = getPhotosCount() - 1;
+                        }
+                        else {
+                            currentPhoto--;
+                        }
 
-                images[amountOfPics] = new ImageIcon(selectedFile.toString());
-                imageScale = images[amountOfPics].getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
-                images[amountOfPics] = new ImageIcon(imageScale);
-                imageLabels[amountOfPics].setIcon(images[amountOfPics]);
-                amountOfPics++;
-                imagePath[amountOfPics] = selectedFile.toString();
-                System.out.println(imagePath[amountOfPics]);
-                System.out.println("Added: " + amountOfPics);
+                        imageLabel1.setIcon(images[currentPhoto]);
+                    }
+                }
+                else if (currentPhoto == 0){
+                    currentPhoto = getPhotosCount() - 1;
+                    imageLabel1.setIcon(images[currentPhoto]);
+                }
                 this.revalidate();
                 this.repaint();
-
-            }
         }
     }
 }

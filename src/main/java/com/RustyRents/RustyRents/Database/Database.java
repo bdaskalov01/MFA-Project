@@ -484,7 +484,7 @@ public class Database {
 
     public static ResultSet getAllProperties(int listingId) {
 
-        String Select = "SELECT listing_id, title, city, listing_type, price, neighbourhood, street, street_number, floor, room_number, q_size, phone_number";
+        String Select = "SELECT title, city, listing_type, price, neighbourhood, street, street_number, floor, room_number, q_size, phone_number";
         String From = "FROM listings";
         String Where = "WHERE listing_id = '" + listingId + "'";
         query = Select + " " + From + " " + Where;
@@ -800,13 +800,28 @@ public class Database {
         return null;
     }
 
-    public static void insertNewProperty(String title, String city, String listing_type, String price, String neighbourhood,
+    public static ResultSet getListingImage() {
+        query = "SELECT imagePath FROM listingimages WHERE listing_id = " + currentListingId;
+        ResultSet rs = null;
+        try {
+            System.out.println("VZEMI TIQ SNIMKI DE");
+            rs = statement.executeQuery(query);
+            return rs;
+        }
+        catch(Exception e) {
+            System.out.println(e);
+        }
+
+        return null;
+    }
+
+    public static void insertNewListing(String title, String city, String listing_type, String price, String neighbourhood,
                                          String street, String streetNumber, String floor, String roomNumber, String qSize, String phoneNumber) {
         values = "NULL, '" + title + "' , '" + city + "' , '" + listing_type + "' , '" + price + "' , '" + neighbourhood + "' , '" + street + "' , '" + streetNumber + "' , '" + floor + "' , '" + roomNumber + "' , '" + qSize + "' , '" + phoneNumber + "' , '" + currentUserId + "'";
         query = "INSERT INTO listings VALUES (" + values + ")";
 
         try {
-            System.out.println("Database.insertNewProperty : Query to insert new property.");
+            System.out.println("Database.insertNewListing : Query to insert new property.");
             System.out.println(query);
 
             statement.execute(query);
@@ -814,6 +829,21 @@ public class Database {
             ResultSet rs = statement.executeQuery("SELECT MAX(listing_id) FROM listings");
             rs.next();
             currentListingId = rs.getInt(1);
+        }
+        catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    public static void addListingImages(String imagePath) {
+        values = "'" + currentListingId + "', '" + imagePath + "'";
+        query = "INSERT INTO listingimages VALUES (" + values + ")";
+
+        try{
+            System.out.println("Database.addListingImages: Query to insert images into listingimages table.");
+            System.out.println(query);
+
+            statement.execute(query);
         }
         catch (Exception e) {
             System.out.println(e);
@@ -832,6 +862,38 @@ public class Database {
         input = input.replaceAll("drop", "");
         input = input.replaceAll("delete", "");
         input = input.replaceAll("--", "");
+
+        return input;
+    }
+
+    public static int listingImagesCount() throws SQLException {
+        query = "SELECT COUNT(imagePath) FROM listingimages WHERE listing_id = " + currentListingId;
+        ResultSet rs = null;
+        try {
+            rs = statement.executeQuery(query);
+            rs.next();
+            return rs.getInt(1);
+        }
+        catch(SQLException e) {
+            System.out.println(e);
+        }
+        finally {
+            rs.close();
+        }
+
+        return 0;
+    }
+
+    public static String imagePathDBInput(String input) {
+
+        input = input.replace("\\" , "$");
+
+        return input;
+    }
+
+    public static String imagePathDBOutput(String input) {
+
+        input = input.replace("$", "\\");
 
         return input;
     }

@@ -540,6 +540,12 @@ public class AddListing extends JFrame implements ActionListener {
        phoneNumberInput.setText("");
     }
 
+    private void removeImages() {
+        for (int i = 0; i < imageLabels.length; i++) {
+            imageLabels[i].setIcon(defaultIcon);
+        }
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
 
@@ -566,13 +572,22 @@ public class AddListing extends JFrame implements ActionListener {
 
         else if (e.getSource() == finishButton) {
             frameNavigator.showFrame(MyListings.class);
-            Database.insertNewProperty(Database.injectionProtection(titleInput.getText()), Database.injectionProtection(cityInput.getText()),
+            Database.insertNewListing(Database.injectionProtection(titleInput.getText()), Database.injectionProtection(cityInput.getText()),
                     Database.injectionProtection(listingTypeInput.getText()), Database.injectionProtection(priceInput.getText()), Database.injectionProtection(neighbourhoodInput.getText()),
                     Database.injectionProtection(streetInput.getText()), Database.injectionProtection(streetNumberInput.getText()), Database.injectionProtection(floorInput.getText()),
                     Database.injectionProtection(roomNumberInput.getText()), Database.injectionProtection(qSizeInput.getText()), Database.injectionProtection(phoneNumberInput.getText()));
+            for (int i = 0; i < imagePath.length; i++) {
+                if(imagePath[i] != null) {
+                    Database.addListingImages(Database.imagePathDBInput(imagePath[i]));
+                    System.out.println(Database.imagePathDBInput(imagePath[i]));
+                    System.out.println(Database.imagePathDBOutput(imagePath[i]));
+                }
+            }
             this.remove(secondPanel);
             this.add(firstPanel);
             clearTextFields();
+            removeImages();
+            amountOfPics = 0;
             this.pack();
             this.revalidate();
             this.repaint();

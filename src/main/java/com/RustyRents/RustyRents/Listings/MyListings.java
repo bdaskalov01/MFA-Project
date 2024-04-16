@@ -282,7 +282,7 @@ public class MyListings extends JFrame implements ActionListener {
 
     public void refreshUIData() {
         // Add properties from database
-        ResultSet rs = Database.getProperties(Database.getCurrentUserId());
+        ResultSet rs = Database.getProperties();
         try {
             while (rs.next()) {
                 row[0] = rs.getInt(1);
@@ -293,10 +293,29 @@ public class MyListings extends JFrame implements ActionListener {
 
                 model.addRow(row);
             }
-        } catch (Exception e) {
+        } catch (Exception e) {System.out.println(e);}
+
+        ResultSet rsType = Database.getPType();
+        try {
+            while (rsType.next()) {
+                cbPropertyTypeFilter.addItem(rsType.getString(1));
+            }
+        }
+        catch (Exception e) {
             System.out.println(e);
         }
+        cbPropertyTypeFilter.setSelectedIndex(-1);
 
+        ResultSet rsCity = Database.getCity();
+        try {
+            while (rsCity.next()) {
+                cbCityNameFilter.addItem(rsCity.getString(1));
+            }
+        }
+        catch (Exception e) {
+            System.out.println(e);
+        }
+        cbCityNameFilter.setSelectedIndex(-1);
     }
 
     public void onCloseInnit() {

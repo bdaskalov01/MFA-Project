@@ -236,15 +236,8 @@ public class ViewListings extends JFrame implements ActionListener {
         btnViewProperty.setForeground(Color.WHITE);
         btnViewProperty.addActionListener(this);
         getContentPane().add(btnViewProperty);
-        /* btnViewProperty.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
 
-            }
-        });
-         */
-
-        this.setTitle("Преглед на обяви˜");
+        this.setTitle("Преглед на обява");
         this.setIconImage(appIcon.getImage());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.getContentPane().setBackground(new Color(248,240,255));
@@ -272,6 +265,27 @@ public class ViewListings extends JFrame implements ActionListener {
             }
         } catch (Exception e) {System.out.println(e);}
 
+        ResultSet rsType = Database.getPType();
+        try {
+            while (rsType.next()) {
+                cbPropertyTypeFilter.addItem(rsType.getString(1));
+            }
+        }
+        catch (Exception e) {
+            System.out.println(e);
+        }
+        cbPropertyTypeFilter.setSelectedIndex(-1);
+
+        ResultSet rsCity = Database.getCity();
+        try {
+            while (rsCity.next()) {
+                cbCityNameFilter.addItem(rsCity.getString(1));
+            }
+        }
+        catch (Exception e) {
+            System.out.println(e);
+        }
+        cbCityNameFilter.setSelectedIndex(-1);
     }
 
     public void onCloseInnit() {
