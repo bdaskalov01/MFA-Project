@@ -1,5 +1,7 @@
 package com.RustyRents.RustyRents.Options;
 
+import com.RustyRents.RustyRents.Account.ChangeEmail;
+import com.RustyRents.RustyRents.Account.ChangePassword;
 import com.RustyRents.RustyRents.FrameNavigator.FrameNavigator;
 import com.RustyRents.RustyRents.MainMenu.MainMenu;
 import jakarta.annotation.PostConstruct;
@@ -51,7 +53,7 @@ public class Options extends JFrame implements ActionListener {
 
         changePasswordButton = new JButton();
         changePasswordButton.setBounds(120,290,250,50);
-        changePasswordButton.setText("ChangePassword");
+        changePasswordButton.setText("Change Password");
         changePasswordButton.addActionListener(this);
         changePasswordButton.setBackground(new Color(139,0,139));
         changePasswordButton.setForeground(Color.white);
@@ -85,6 +87,7 @@ public class Options extends JFrame implements ActionListener {
         layeredPane.setOpaque(true);
 
         this.add(layeredPane);
+        this.setTitle("Options");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setIconImage(optionsIcon.getImage());
         this.setSize(500,500);
@@ -94,15 +97,15 @@ public class Options extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource()==changeEmailButton) {
-
+            frameNavigator.showFrame(ChangeEmail.class);
         }
 
         else if (e.getSource()==changePasswordButton) {
-
+            frameNavigator.showFrame(ChangePassword.class);
         }
 
         else if (e.getSource() == backButton) {
-
+            frameNavigator.showFrame(MainMenu.class);
         }
     }
 }

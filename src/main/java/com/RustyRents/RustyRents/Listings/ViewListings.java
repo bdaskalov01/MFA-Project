@@ -5,6 +5,8 @@ import com.RustyRents.RustyRents.FrameNavigator.FrameNavigator;
 import com.RustyRents.RustyRents.MainMenu.MainMenu;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
@@ -24,6 +26,7 @@ import java.sql.ResultSet;
 public class ViewListings extends JFrame implements ActionListener {
 
 
+    private static final Logger logger = LogManager.getLogger(ViewListings.class.getName());
     private static final long serialVersionUID = 1L;
     JLayeredPane layeredPane;
     JTable table;
@@ -60,7 +63,7 @@ public class ViewListings extends JFrame implements ActionListener {
         ImageIcon appIcon = new ImageIcon("RustyRentsIcon.png");
 
         //TODO replace column objects with DB values
-        columns = new Object[] {"Номер на обява", "Име на обява", "Град", "Вид имот", "Цена"};
+        columns = new Object[] {"Listing ID", "Name", "City", "Property type", "Price"};
 
 
         model = new DefaultTableModel();
@@ -86,7 +89,7 @@ public class ViewListings extends JFrame implements ActionListener {
                         Database.setCurrentListingId(selectedListingId);
                     }
                     catch(Exception e) {
-                        System.out.println(e);
+                        logger.fatal(e.getMessage());
                     }
                 }
             }
@@ -104,7 +107,7 @@ public class ViewListings extends JFrame implements ActionListener {
         //
 
         // Listing name label
-        lblListingNameFilter = new JLabel("Име на обявата");
+        lblListingNameFilter = new JLabel("Name");
         lblListingNameFilter.setFont(new Font("Tahoma", Font.PLAIN, LABELS_FONT_SIZE));
         lblListingNameFilter.setForeground(Color.BLACK);
         lblListingNameFilter.setBounds(54, LABELS_POSITION_Y, 250, LABELS_HEIGHT);
@@ -117,7 +120,7 @@ public class ViewListings extends JFrame implements ActionListener {
         tfListingNameFilter.setColumns(10);
 
         // City name filter label
-        lblCityNameFilter = new JLabel("Град");
+        lblCityNameFilter = new JLabel("City");
         lblCityNameFilter.setForeground(Color.BLACK);
         lblCityNameFilter.setFont(new Font("Tahoma", Font.PLAIN, LABELS_FONT_SIZE));
         lblCityNameFilter.setBounds(260, LABELS_POSITION_Y, LABELS_WIDTH, LABELS_HEIGHT);
@@ -134,13 +137,13 @@ public class ViewListings extends JFrame implements ActionListener {
             }
         }
         catch (Exception e) {
-            System.out.println(e);
+            logger.fatal(e.getMessage());
         }
         cbCityNameFilter.setSelectedIndex(-1);
         getContentPane().add(cbCityNameFilter);
 
         // Property type filter label
-        lblPropertyTypeFilter = new JLabel("Вид имот");
+        lblPropertyTypeFilter = new JLabel("Property type");
         lblPropertyTypeFilter.setFont(new Font("Tahoma", Font.PLAIN, LABELS_FONT_SIZE));
         lblPropertyTypeFilter.setForeground(Color.BLACK);
         lblPropertyTypeFilter.setBounds(410, LABELS_POSITION_Y, LABELS_WIDTH, LABELS_HEIGHT);
@@ -157,13 +160,13 @@ public class ViewListings extends JFrame implements ActionListener {
             }
         }
         catch (Exception e) {
-            System.out.println(e);
+            logger.fatal(e.getMessage());
         }
         cbPropertyTypeFilter.setSelectedIndex(-1);
         getContentPane().add(cbPropertyTypeFilter);
 
         // Max price filter label
-        lblMaxPriceFilter = new JLabel("Max. цена");
+        lblMaxPriceFilter = new JLabel("Max. Price");
         lblMaxPriceFilter.setFont(new Font("Tahoma", Font.PLAIN, LABELS_FONT_SIZE));
         lblMaxPriceFilter.setForeground(Color.BLACK);
         lblMaxPriceFilter.setBounds(530, LABELS_POSITION_Y, LABELS_WIDTH, LABELS_HEIGHT);
@@ -178,7 +181,7 @@ public class ViewListings extends JFrame implements ActionListener {
 
 
         // Search button
-        JButton btnFilterResults = new JButton("Търси");
+        JButton btnFilterResults = new JButton("Search");
         btnFilterResults.setFont(new Font("Tahoma", Font.PLAIN, 20));
         btnFilterResults.setBounds(616, 72, 107, 25);
         btnFilterResults.setBackground(new Color(139,0,139));
@@ -194,8 +197,6 @@ public class ViewListings extends JFrame implements ActionListener {
                 String priceFilter = tfMaxPriceFilter.getText().toString();
                 int price = Integer.parseInt(priceFilter);
 
-                System.out.println(typeFilter);
-
                 ResultSet rs = Database.getFilteredProperties(titleFilter, cityFilter, typeFilter, price);
 
                 try {
@@ -208,7 +209,7 @@ public class ViewListings extends JFrame implements ActionListener {
 
                         model.addRow(row);
                     }
-                } catch (Exception exc) {System.out.println(exc);}
+                } catch (Exception exc) {logger.fatal(exc.getMessage());}
 
             }
         });
@@ -226,7 +227,7 @@ public class ViewListings extends JFrame implements ActionListener {
         getContentPane().add(backButton);
 
         // View property button
-        btnViewProperty = new JButton("Преглед на имот");
+        btnViewProperty = new JButton("View details");
         btnViewProperty.setHorizontalTextPosition(SwingConstants.CENTER);
         btnViewProperty.setAlignmentY(Component.BOTTOM_ALIGNMENT);
         btnViewProperty.setAlignmentX(Component.RIGHT_ALIGNMENT);
@@ -237,7 +238,7 @@ public class ViewListings extends JFrame implements ActionListener {
         btnViewProperty.addActionListener(this);
         getContentPane().add(btnViewProperty);
 
-        this.setTitle("Преглед на обява");
+        this.setTitle("View listings");
         this.setIconImage(appIcon.getImage());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.getContentPane().setBackground(new Color(248,240,255));
@@ -246,8 +247,6 @@ public class ViewListings extends JFrame implements ActionListener {
         this.setBounds(100,100,757,500);
         this.getContentPane().add(pane);
         this.setLocationRelativeTo(null);
-
-        // TODO this.add(layeredPane);
     }
 
     public void refreshUIData() {
@@ -263,27 +262,56 @@ public class ViewListings extends JFrame implements ActionListener {
 
                 model.addRow(row);
             }
-        } catch (Exception e) {System.out.println(e);}
+        } catch (Exception e) {logger.fatal(e.getMessage());}
 
         ResultSet rsType = Database.getPType();
         try {
+
             while (rsType.next()) {
-                cbPropertyTypeFilter.addItem(rsType.getString(1));
+                String rsItem = rsType.getString(1);
+                boolean itemExists = false;
+
+                for (int i = 0; i < cbPropertyTypeFilter.getItemCount(); i++) {
+                    String item = cbPropertyTypeFilter.getItemAt(i);
+                    if (rsItem.equals(item)) {
+                        itemExists = true;
+                        break;
+                    }
+                }
+
+                if (!itemExists) {
+                    cbPropertyTypeFilter.addItem(rsItem);
+                }
             }
+
+            rsType.close();
         }
         catch (Exception e) {
-            System.out.println(e);
+            logger.fatal(e.getMessage());
         }
         cbPropertyTypeFilter.setSelectedIndex(-1);
 
         ResultSet rsCity = Database.getCity();
         try {
             while (rsCity.next()) {
-                cbCityNameFilter.addItem(rsCity.getString(1));
+                String rsItem = rsCity.getString(1);
+                boolean itemExists = false;
+
+                for (int i = 0; i < cbCityNameFilter.getItemCount(); i++) {
+                    String item = cbCityNameFilter.getItemAt(i);
+                    if (rsItem.equals(item)) {
+                        itemExists = true;
+                        break;
+                    }
+                }
+
+                if (!itemExists) {
+                    cbCityNameFilter.addItem(rsItem);
+                }
             }
         }
         catch (Exception e) {
-            System.out.println(e);
+            logger.fatal(e.getMessage());
         }
         cbCityNameFilter.setSelectedIndex(-1);
     }
@@ -296,6 +324,7 @@ public class ViewListings extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource()== backButton) {
             framenavigator.showFrame(MainMenu.class);
+            Database.setCurrentListingId(-1);
         }
 
         else if (e.getSource()== btnViewProperty) {

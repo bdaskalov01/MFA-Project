@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
+import javax.xml.crypto.Data;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,6 +18,8 @@ import java.awt.event.ActionListener;
 public class MyProfile extends JFrame implements ActionListener {
 
     JButton backButton;
+
+    JLabel usernameData, emailData;
 
     JButton changeEmailButton = new JButton();
     JButton changePasswordButton = new JButton();
@@ -62,10 +65,10 @@ public class MyProfile extends JFrame implements ActionListener {
         email.setBounds(135, 320, 130, 15);
 
 
-        JLabel usernameData = new JLabel(Database.getUsername());
+        usernameData = new JLabel(Database.getUsername());
         usernameData.setBounds(205, 270, 200, 15);
 
-        JLabel emailData = new JLabel(Database.getEmail());
+        emailData = new JLabel(Database.getEmail());
         emailData.setBounds(175, 320, 200, 15);
 
 
@@ -80,7 +83,7 @@ public class MyProfile extends JFrame implements ActionListener {
         layeredPane.add(changeEmailButton, Integer.valueOf(6));
         layeredPane.add(changePasswordButton, Integer.valueOf(7));
 
-        this.setTitle("Renter MyProfile");
+        this.setTitle("My profile");
         this.setIconImage(appIcon.getImage());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
@@ -88,6 +91,11 @@ public class MyProfile extends JFrame implements ActionListener {
         this.setLocationRelativeTo(null);
         this.add(layeredPane);
 
+    }
+
+    public void refreshUIData() {
+        usernameData.setText(Database.getUsername());
+        emailData.setText(Database.getEmail());
     }
 
 

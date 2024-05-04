@@ -1,8 +1,10 @@
-package com.RustyRents.RustyRents.Tokens;
+package com.RustyRents.RustyRents.Security;
 
 import com.RustyRents.RustyRents.Database.Database;
 import com.RustyRents.RustyRents.FrameNavigator.FrameNavigator;
 import com.RustyRents.RustyRents.Services.EmailSenderService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -32,6 +34,7 @@ public class SoftwareToken extends JFrame implements ActionListener {
     private static final String SECRET_KEY = "YourSecretKey123"; // 16 characters for AES-128, 24 characters for AES-192, 32 characters for AES-256
     private static final String INIT_VECTOR = "YourInitVector12"; // 16 bytes IV for AES
 
+    private static Logger logger = LogManager.getLogger(SoftwareToken.class.getName());
     int originalUserID;
     Timer timer;
     ImageIcon logo;
@@ -47,14 +50,13 @@ public class SoftwareToken extends JFrame implements ActionListener {
 
     public SoftwareToken(FrameNavigator frameNavigator) throws InterruptedException {
 
-        // TODO имплементирай проверка дали съществува credentials файл
 
         Path filepath = Paths.get(CREDENTIALS_FILE);
 
         if (Files.exists(filepath)) {
-            System.out.println("The file exists in the directory.");
+            logger.info("The file exists in the directory.");
         } else {
-            System.out.println("The file does not exist in the directory.");
+            logger.info("The file does not exist in the directory.");
             saveCredentials("test", "test");
         }
 
@@ -102,22 +104,23 @@ public class SoftwareToken extends JFrame implements ActionListener {
         notLoggedPane.add(logInButton);
 
 
-
+        Database.establishConnection();
+        String[] credentials = readCredentials();
+        String username = credentials[0];
+        String password = credentials[1];
 
 
         timer = new Timer(1000 , new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //Database.setCurrentUserId(Database.getUserId(username));
                 count--;
-                generatedCodeLabel.setText("Generated code: " + Database.getCurrentGeneratedCode());
                 remainingTimeLabel.setText("Time left: " + count + " seconds");
-                Database.establishConnection();
-                currentUserLabel.setText("Username: " + Database.getUsername());
+
                 if (count <= 0) {
                     count = 60;
-                    Database.removeSoftwareCode();
-                    Database.generateSoftwareCode();
+                    Database.removeSoftwareCode(Database.getUserId(username));
+                    Database.generateSoftwareCode(Database.getUserId(username));
+                    generatedCodeLabel.setText("Generated code: " + Database.getSoftwareCode(Database.getUserId(username)));
                 }
             }
         });
@@ -129,15 +132,16 @@ public class SoftwareToken extends JFrame implements ActionListener {
         this.setSize(300,250);
 
 
-        Database.establishConnection();
-        String[] credentials = readCredentials();
-        String username = credentials[0];
-        String password = credentials[1];
+
         if (Database.isValidLogin(username, password)) {
-            Database.setCurrentUserId(Database.getUserId(username));
-           Database.generateSoftwareCode();
+            //Database.setCurrentUserId(Database.getUserId(username));
+           Database.generateSoftwareCode(Database.getUserId(username));
            this.add(loggedPane);
+            Database.establishConnection();
             timer.start();
+            currentUserLabel.setText("Username: " + Database.getUsername(Database.getUserId(username)));
+            generatedCodeLabel.setText("Generated code: " + Database.getSoftwareCode(Database.getUserId(username)));
+
         }
         else if (!Database.isValidLogin(username, password)){
            this.add(notLoggedPane);
@@ -150,7 +154,7 @@ public class SoftwareToken extends JFrame implements ActionListener {
             encryptedCredentials = encrypt(encryptedCredentials);
             Files.write(Paths.get(CREDENTIALS_FILE), encryptedCredentials.getBytes()); // Write encrypted credentials to file
         } catch (IOException e) {
-            e.printStackTrace(); // Handle error
+            logger.fatal(e.getMessage()); // Handle error
         }
     }
 
@@ -158,7 +162,7 @@ public class SoftwareToken extends JFrame implements ActionListener {
         try {
             Files.deleteIfExists(Paths.get(CREDENTIALS_FILE)); // Delete credentials file if it exists
         } catch (IOException e) {
-            e.printStackTrace(); // Handle error
+            logger.fatal(e.getMessage()); // Handle error
         }
     }
 
@@ -169,7 +173,7 @@ public class SoftwareToken extends JFrame implements ActionListener {
             encryptedCredentials = decrypt(encryptedCredentials);
             return encryptedCredentials.split("="); // Decrypt and split credentials
         } catch (IOException e) {
-            e.printStackTrace(); // Handle error
+           logger.fatal(e.getMessage());
         }
         return null;
     }
@@ -185,7 +189,7 @@ public class SoftwareToken extends JFrame implements ActionListener {
             byte[] encrypted = cipher.doFinal(value.getBytes("UTF-8"));
             return Base64.getEncoder().encodeToString(encrypted);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.fatal(ex.getMessage());
         }
         return null;
     }
@@ -202,9 +206,9 @@ public class SoftwareToken extends JFrame implements ActionListener {
 
             return new String(original, "UTF-8");
         } catch (IllegalArgumentException ex) {
-            System.err.println("Error: Input string is not a valid Base64-encoded string.");
+            logger.fatal("Error: Input string is not a valid Base64-encoded string.");
         } catch (Exception ex) {
-            ex.printStackTrace();
+            logger.fatal(ex.getMessage());
         }
 
         return null;
@@ -216,13 +220,14 @@ public class SoftwareToken extends JFrame implements ActionListener {
         String[] credentials = readCredentials();
         String username = credentials[0];
         String password = credentials[1];
-        System.out.println("Username: " + username);
-        System.out.println("Password: " + password);
+        logger.debug("Username: " + username);
+        logger.debug("Password: " + password);
+        currentUserLabel.setText("Username: " + Database.getUsername(Database.getUserId(username)));
         this.remove(notLoggedPane);
         this.add(loggedPane);
         this.revalidate();
         this.repaint();
-        Database.generateSoftwareCode();
+        Database.generateSoftwareCode(Database.getUserId(username));
         timer.start();
     }
 
@@ -240,6 +245,7 @@ public class SoftwareToken extends JFrame implements ActionListener {
         }
 
         if (e.getSource()==logOutButton) {
+            /*
             this.remove(loggedPane);
             this.add(notLoggedPane);
             this.revalidate();
@@ -248,6 +254,8 @@ public class SoftwareToken extends JFrame implements ActionListener {
             count = 60;
             Database.removeSoftwareCode();
             saveCredentials(null, null);
+             */
+            logger.fatal(Database.getCurrentUserId());
         }
     }
 }

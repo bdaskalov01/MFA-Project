@@ -1,6 +1,7 @@
 package com.RustyRents.RustyRents.MainMenu;
 
 import com.RustyRents.RustyRents.Account.MyProfile;
+import com.RustyRents.RustyRents.Admin.AdminPanel;
 import com.RustyRents.RustyRents.Database.Database;
 import com.RustyRents.RustyRents.FrameNavigator.FrameNavigator;
 import com.RustyRents.RustyRents.Listings.MyListings;
@@ -17,7 +18,7 @@ import java.awt.event.ActionListener;
 @Component
 public class MainMenu extends JFrame implements ActionListener{
 
-    JButton settingsButton, myProfileButton, myListingsButton, viewListingsButon, logOutButton;
+    JButton settingsButton, myProfileButton, myListingsButton, viewListingsButon, logOutButton, adminPanelButton;
     JLabel greetingsText, backgroundLabel, logoImage;
     ImageIcon backgroundImage, appIcon, settingsIcon, appLogo, logOutImage;
     JPanel mainMenuPanel;
@@ -50,7 +51,7 @@ public class MainMenu extends JFrame implements ActionListener{
         settingsButton.setBorderPainted(false);
 
         myProfileButton = new JButton();
-        myProfileButton.setText("МОЯТ ПРОФИЛ");
+        myProfileButton.setText("My profile");
         myProfileButton.setFocusable(false);
         myProfileButton.setBounds(325, 550, 150, 100);
         myProfileButton.addActionListener(this);
@@ -58,7 +59,7 @@ public class MainMenu extends JFrame implements ActionListener{
         myProfileButton.setForeground(Color.white);
 
         myListingsButton = new JButton();
-        myListingsButton.setText("МОИТЕ ОБЯВИ");
+        myListingsButton.setText("My listings");
         myListingsButton.setFocusable(false);
         myListingsButton.setBounds(165, 550, 150, 100);
         myListingsButton.addActionListener(this);
@@ -66,12 +67,20 @@ public class MainMenu extends JFrame implements ActionListener{
         myListingsButton.setForeground(Color.white);
 
         viewListingsButon = new JButton();
-        viewListingsButon.setText("ВИЖ ОБЯВИ");
+        viewListingsButon.setText("View listings");
         viewListingsButon.setFocusable(false);
         viewListingsButon.setBounds(5, 550, 150, 100);
         viewListingsButon.addActionListener(this);
         viewListingsButon.setBackground(new Color(139,0,139));
         viewListingsButon.setForeground(Color.white);
+
+        adminPanelButton = new JButton("Admin Panel");
+        adminPanelButton.setFocusable(false);
+        adminPanelButton.setBounds(190, 15, 110,30);
+        adminPanelButton.addActionListener(this);
+        adminPanelButton.setBackground(new Color(139,0,139));
+        adminPanelButton.setForeground(Color.white);
+
 
         backgroundLabel = new JLabel();
         backgroundLabel.setIcon(backgroundImage);
@@ -100,7 +109,7 @@ public class MainMenu extends JFrame implements ActionListener{
         layeredPane.add(greetingsText, Integer.valueOf(7));
 
         this.setIconImage(appIcon.getImage());
-        this.setTitle("Rusty Rents test.Main Menu");
+        this.setTitle("Main Menu");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
         this.setSize(500,700);
@@ -109,7 +118,10 @@ public class MainMenu extends JFrame implements ActionListener{
     }
 
     public void refreshUIData() {
-        greetingsText.setText("Добре дошъл, " + Database.getUsername());
+        greetingsText.setText("Welcome, " + Database.getUsername());
+        if (Database.getCurrentUserId() == 1) {
+            layeredPane.add(adminPanelButton, Integer.valueOf(8));
+        }
     }
 
     @Override
@@ -129,7 +141,12 @@ public class MainMenu extends JFrame implements ActionListener{
         }
         else if (e.getSource()==logOutButton) {
             Database.setCurrentUserId(0);
+            layeredPane.remove(adminPanelButton);
             framenavigator.showFrame(LogIn.class);
+        }
+
+        else if (e.getSource() == adminPanelButton) {
+            framenavigator.showFrame(AdminPanel.class);
         }
     }
 }

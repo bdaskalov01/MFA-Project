@@ -194,8 +194,11 @@ public class ListingDetails extends JFrame implements ActionListener {
  */
 package com.RustyRents.RustyRents.Listings;
 
+import com.RustyRents.RustyRents.Admin.ListingsAdmin;
 import com.RustyRents.RustyRents.Database.Database;
 import com.RustyRents.RustyRents.FrameNavigator.FrameNavigator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -210,6 +213,7 @@ import java.sql.SQLOutput;
 @Component
 public class ListingDetails extends JFrame implements ActionListener {
 
+    private static final Logger logger = LogManager.getLogger(ListingsAdmin.class.getName());
     private final FrameNavigator frameNavigator;
     private int currentPhoto = 0;
     private String[] imagePath;
@@ -520,32 +524,18 @@ public class ListingDetails extends JFrame implements ActionListener {
             qSizeLabelOutput.setText(rs.getString(10));
             phoneNumberLabelOutput.setText(rs.getString(11));
 
-            System.out.println(rs.getString(1));
-            System.out.println(rs.getString(2));
-            System.out.println(rs.getString(3));
-            System.out.println(rs.getString(4));
-            System.out.println(rs.getString(5));
-            System.out.println(rs.getString(6));
-            System.out.println(rs.getString(7));
-            System.out.println(rs.getString(8));
-            System.out.println(rs.getString(9));
-            System.out.println(rs.getString(10));
-            System.out.println(rs.getString(11));
-
             rs.close();
 
         }
         catch (Exception e) {
-            System.out.println(e);
+            logger.fatal(e.getMessage());
         }
 
         try {
             dbImages = Database.getListingImage();
             for (int i = 0; i < imagePath.length; i++) {
                 if (dbImages.next()) {
-                    System.out.println(dbImages.getString(1));
                     imagePath[i] = Database.imagePathDBOutput(dbImages.getString(1));
-                    System.out.println(i);
                 }
             }
             for (int i = 0; i < images.length; i++) {
@@ -553,14 +543,13 @@ public class ListingDetails extends JFrame implements ActionListener {
                     images[i] = new ImageIcon(imagePath[i]);
                     imageScale = images[i].getImage().getScaledInstance(400, 400, Image.SCALE_SMOOTH);
                     images[i] = new ImageIcon(imageScale);
-                    System.out.println(images[i].getImage().toString());
                 }
             }
 
             imageLabel1.setIcon(images[0]);
         }
         catch (Exception e) {
-            System.out.println(e);
+            logger.fatal(e.getMessage());
         }
 
     }
@@ -581,8 +570,8 @@ public class ListingDetails extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e) {
 
         if (e.getSource() == backButton) {
-            frameNavigator.showFrame(MyListings.class);
-            clearTextFields();
+            frameNavigator.showFrame(ViewListings.class);
+           // clearTextFields();
         }
 
         else if (e.getSource() == nextButton) {

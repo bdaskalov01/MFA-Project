@@ -1,8 +1,7 @@
-package com.RustyRents.RustyRents.Tokens;
+package com.RustyRents.RustyRents.Security;
 
 import com.RustyRents.RustyRents.Database.Database;
 import com.RustyRents.RustyRents.FrameNavigator.FrameNavigator;
-import com.RustyRents.RustyRents.LogIn.LogIn;
 import com.RustyRents.RustyRents.Services.EmailSenderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

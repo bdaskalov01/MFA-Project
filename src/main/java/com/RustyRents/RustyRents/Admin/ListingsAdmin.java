@@ -1,38 +1,37 @@
-package com.RustyRents.RustyRents.Listings;
+package com.RustyRents.RustyRents.Admin;
 
 import com.RustyRents.RustyRents.Database.Database;
 import com.RustyRents.RustyRents.FrameNavigator.FrameNavigator;
+import com.RustyRents.RustyRents.Listings.AddListing;
+import com.RustyRents.RustyRents.Listings.EditListing;
+import com.RustyRents.RustyRents.Listings.ListingDetails;
 import com.RustyRents.RustyRents.MainMenu.MainMenu;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
-import javax.xml.crypto.Data;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.Color;
-import java.awt.Font;
 import java.sql.ResultSet;
 
-
 @Component
-public class MyListings extends JFrame implements ActionListener {
+public class ListingsAdmin extends JFrame implements ActionListener {
 
-    private static final Logger logger = LogManager.getLogger(MyListings.class.getName());
+    FrameNavigator frameNavigator;
+
+    private static final Logger logger = LogManager.getLogger(ListingsAdmin.class.getName());
     private static final long serialVersionUID = 1L;
     JLayeredPane layeredPane;
     JTable table;
     Object[] columns, row;
     DefaultTableModel model;
     JScrollPane pane;
-    JButton backButton, btnViewProperty, addPropertyButton, deletePropertyButton;
+    JButton backButton, btnViewProperty, editPropertyButton, deletePropertyButton;
 
     JComboBox<String> cbCityNameFilter, cbPropertyTypeFilter;
 
@@ -55,15 +54,14 @@ public class MyListings extends JFrame implements ActionListener {
     private final int LABELS_WIDTH = 100;
     private final int LABELS_HEIGHT = 50;
 
-    private final FrameNavigator framenavigator;
-    public MyListings(FrameNavigator framenavigator) {
-        this.framenavigator = framenavigator;
+    public ListingsAdmin(FrameNavigator frameNavigator) {
+        this.frameNavigator = frameNavigator;
         setAutoRequestFocus(false);
         ImageIcon backIcon = new ImageIcon("BackIcon.png");
         ImageIcon appIcon = new ImageIcon("RustyRentsIcon.png");
 
         //TODO replace column objects with DB values
-        columns = new Object[] {"Listing ID", "Name", "City", "Property type", "Price"};
+        columns = new Object[] {"Номер на обява", "Име на обява", "Град", "Вид имот", "Цена"};
 
 
         model = new DefaultTableModel();
@@ -107,7 +105,7 @@ public class MyListings extends JFrame implements ActionListener {
         //
 
         // Listing name label
-        lblListingNameFilter = new JLabel("Name");
+        lblListingNameFilter = new JLabel("Име на обявата");
         lblListingNameFilter.setFont(new Font("Tahoma", Font.PLAIN, LABELS_FONT_SIZE));
         lblListingNameFilter.setForeground(Color.BLACK);
         lblListingNameFilter.setBounds(54, LABELS_POSITION_Y, 250, LABELS_HEIGHT);
@@ -120,7 +118,7 @@ public class MyListings extends JFrame implements ActionListener {
         tfListingNameFilter.setColumns(10);
 
         // City name filter label
-        lblCityNameFilter = new JLabel("City");
+        lblCityNameFilter = new JLabel("Град");
         lblCityNameFilter.setForeground(Color.BLACK);
         lblCityNameFilter.setFont(new Font("Tahoma", Font.PLAIN, LABELS_FONT_SIZE));
         lblCityNameFilter.setBounds(260, LABELS_POSITION_Y, LABELS_WIDTH, LABELS_HEIGHT);
@@ -130,7 +128,6 @@ public class MyListings extends JFrame implements ActionListener {
         cbCityNameFilter = new JComboBox<String>();
         cbCityNameFilter.setBounds(255, 79, 130, 19);
         cbCityNameFilter.insertItemAt("", 0);
-
         ResultSet rsCity = Database.getCity();
         try {
             while (rsCity.next()) {
@@ -144,7 +141,7 @@ public class MyListings extends JFrame implements ActionListener {
         getContentPane().add(cbCityNameFilter);
 
         // Property type filter label
-        lblPropertyTypeFilter = new JLabel("Property type");
+        lblPropertyTypeFilter = new JLabel("Вид имот");
         lblPropertyTypeFilter.setFont(new Font("Tahoma", Font.PLAIN, LABELS_FONT_SIZE));
         lblPropertyTypeFilter.setForeground(Color.BLACK);
         lblPropertyTypeFilter.setBounds(410, LABELS_POSITION_Y, LABELS_WIDTH, LABELS_HEIGHT);
@@ -167,7 +164,7 @@ public class MyListings extends JFrame implements ActionListener {
         getContentPane().add(cbPropertyTypeFilter);
 
         // Max price filter label
-        lblMaxPriceFilter = new JLabel("Max Price");
+        lblMaxPriceFilter = new JLabel("Max. цена");
         lblMaxPriceFilter.setFont(new Font("Tahoma", Font.PLAIN, LABELS_FONT_SIZE));
         lblMaxPriceFilter.setForeground(Color.BLACK);
         lblMaxPriceFilter.setBounds(530, LABELS_POSITION_Y, LABELS_WIDTH, LABELS_HEIGHT);
@@ -182,7 +179,7 @@ public class MyListings extends JFrame implements ActionListener {
 
 
         // Search button
-        JButton btnFilterResults = new JButton("Search");
+        JButton btnFilterResults = new JButton("Търси");
         btnFilterResults.setFont(new Font("Tahoma", Font.PLAIN, 20));
         btnFilterResults.setBounds(616, 72, 107, 25);
         btnFilterResults.setBackground(new Color(139,0,139));
@@ -211,7 +208,7 @@ public class MyListings extends JFrame implements ActionListener {
 
                         model.addRow(row);
                     }
-                } catch (Exception exc) {      logger.fatal(exc.getMessage());}
+                } catch (Exception exc) {logger.fatal(exc.getMessage());}
 
             }
         });
@@ -229,7 +226,7 @@ public class MyListings extends JFrame implements ActionListener {
         getContentPane().add(backButton);
 
         // View property button
-        btnViewProperty = new JButton("View details");
+        btnViewProperty = new JButton("View listing");
         btnViewProperty.setHorizontalTextPosition(SwingConstants.CENTER);
         btnViewProperty.setAlignmentY(java.awt.Component.BOTTOM_ALIGNMENT);
         btnViewProperty.setAlignmentX(java.awt.Component.RIGHT_ALIGNMENT);
@@ -241,16 +238,16 @@ public class MyListings extends JFrame implements ActionListener {
         getContentPane().add(btnViewProperty);
 
         // Add property button
-        addPropertyButton = new JButton("Add listing");
-        addPropertyButton.setHorizontalTextPosition(SwingConstants.CENTER);
-        addPropertyButton.setAlignmentY(java.awt.Component.BOTTOM_ALIGNMENT);
-        addPropertyButton.setAlignmentX(java.awt.Component.RIGHT_ALIGNMENT);
-        addPropertyButton.setFont(new Font("Tahoma", Font.PLAIN, 20));
-        addPropertyButton.setBounds(103, 395, 196, 51);
-        addPropertyButton.setBackground(new Color(139,0,139));
-        addPropertyButton.setForeground(Color.WHITE);
-        addPropertyButton.addActionListener(this);
-        getContentPane().add(addPropertyButton);
+        editPropertyButton = new JButton("Edit listing");
+        editPropertyButton.setHorizontalTextPosition(SwingConstants.CENTER);
+        editPropertyButton.setAlignmentY(java.awt.Component.BOTTOM_ALIGNMENT);
+        editPropertyButton.setAlignmentX(java.awt.Component.RIGHT_ALIGNMENT);
+        editPropertyButton.setFont(new Font("Tahoma", Font.PLAIN, 20));
+        editPropertyButton.setBounds(103, 395, 196, 51);
+        editPropertyButton.setBackground(new Color(139,0,139));
+        editPropertyButton.setForeground(Color.WHITE);
+        editPropertyButton.addActionListener(this);
+        getContentPane().add(editPropertyButton);
 
         // Delete property button
         deletePropertyButton = new JButton("Delete listing");
@@ -266,7 +263,7 @@ public class MyListings extends JFrame implements ActionListener {
 
 
 //        addPropertyButton
-        this.setTitle("My listings");
+        this.setTitle("Listings Admin Panel");
         this.setIconImage(appIcon.getImage());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.getContentPane().setBackground(new Color(248,240,255));
@@ -275,13 +272,11 @@ public class MyListings extends JFrame implements ActionListener {
         this.setBounds(100,100,757,500);
         this.getContentPane().add(pane);
         this.setLocationRelativeTo(null);
-
-        // TODO this.add(layeredPane);
     }
 
     public void refreshUIData() {
         // Add properties from database
-        ResultSet rs = Database.getProperties(Database.getCurrentUserId());
+        ResultSet rs = Database.getProperties();
         try {
             while (rs.next()) {
                 row[0] = rs.getInt(1);
@@ -294,7 +289,7 @@ public class MyListings extends JFrame implements ActionListener {
             }
         } catch (Exception e) {logger.fatal(e.getMessage());}
 
-        ResultSet rsType = Database.getPType(Database.getCurrentUserId());
+        ResultSet rsType = Database.getPType();
         try {
 
             while (rsType.next()) {
@@ -321,7 +316,7 @@ public class MyListings extends JFrame implements ActionListener {
         }
         cbPropertyTypeFilter.setSelectedIndex(-1);
 
-        ResultSet rsCity = Database.getCity(Database.getCurrentUserId());
+        ResultSet rsCity = Database.getCity();
         try {
             while (rsCity.next()) {
                 String rsItem = rsCity.getString(1);
@@ -349,25 +344,24 @@ public class MyListings extends JFrame implements ActionListener {
     public void onCloseInnit() {
         model.setRowCount(0);
     }
-
-
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == backButton) {
-            framenavigator.showFrame(MainMenu.class);
+            frameNavigator.showFrame(AdminPanel.class);
             Database.setCurrentListingId(-1);
         }
 
         else if (e.getSource() == btnViewProperty) {
-            framenavigator.showFrame(ListingDetails.class);
+            frameNavigator.showFrame(ListingDetails.class);
         }
 
-        else if (e.getSource() == addPropertyButton) {
-            framenavigator.showFrame(AddListing.class);
+        else if (e.getSource() == editPropertyButton) {
+            frameNavigator.showFrame(EditListing.class);
         }
 
         else if (e.getSource() == deletePropertyButton) {
             Database.deleteProperty(Database.getCurrentListingId());
+            Database.removeListingImages();
             onCloseInnit();
             refreshUIData();
         }

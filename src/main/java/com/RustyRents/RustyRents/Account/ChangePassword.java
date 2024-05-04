@@ -2,6 +2,7 @@ package com.RustyRents.RustyRents.Account;
 
 import com.RustyRents.RustyRents.Database.Database;
 import com.RustyRents.RustyRents.FrameNavigator.FrameNavigator;
+import com.RustyRents.RustyRents.Options.Options;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,7 @@ public class ChangePassword extends JFrame implements ActionListener {
         confirmPassword.setBounds(90, 140, 150, 15);
 
         passwordsNotMatching = new JLabel("Паролите не съвпадат.");
-        passwordsNotMatching.setBounds(170,170,150,30);
+        passwordsNotMatching.setBounds(170,170,200,30);
         passwordsNotMatching.setForeground(Color.RED);
         passwordsNotMatching.setVisible(false);
 
@@ -109,13 +110,16 @@ public class ChangePassword extends JFrame implements ActionListener {
 
             if (isConfirmationSuccessful && Database.checkPasswordMatch(new String(currentPasswordTextField.getPassword()))) {
                 Database.changePassword(getNewPassword);
+                passwordsNotMatching.setVisible(false);
+                frameNavigator.showFrame(Options.class);
             }
-            else {
-                // TODO SWING : Label "Грешно въведена настояща парола" under text field for current password
-                System.out.println("Current password does not match with input data");
+            else if (!Database.checkPasswordMatch(new String(currentPasswordTextField.getPassword()))){
+                passwordsNotMatching.setText("Current password doesn't match");
+                passwordsNotMatching.setVisible(true);
             }
 
-            if (!isConfirmationSuccessful) {
+            else if (!isConfirmationSuccessful) {
+                passwordsNotMatching.setText("Passwords don't match");
                 passwordsNotMatching.setVisible(true);
             }
             else {
@@ -123,7 +127,8 @@ public class ChangePassword extends JFrame implements ActionListener {
             }
         }
         else if(e.getSource()==cancelOperation){
-
+            frameNavigator.showFrame(Options.class);
+            passwordsNotMatching.setVisible(false);
         }
     }
 }

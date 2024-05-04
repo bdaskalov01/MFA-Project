@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 
 import com.RustyRents.RustyRents.Database.Database;
 import com.RustyRents.RustyRents.FrameNavigator.FrameNavigator;
+import com.RustyRents.RustyRents.Options.Options;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,8 +47,8 @@ public class ChangeEmail extends JFrame implements ActionListener {
         confirmEmail = new JLabel("Потвърди email: ");
         confirmEmail.setBounds(115, 140, 150, 15);
 
-        emailsNotMatching = new JLabel("Имейлите не съвпадат.");
-        emailsNotMatching.setBounds(170,170,150,30);
+        emailsNotMatching = new JLabel("");
+        emailsNotMatching.setBounds(170,170,200,30);
         emailsNotMatching.setForeground(Color.RED);
         emailsNotMatching.setVisible(false);
 
@@ -111,13 +112,17 @@ public class ChangeEmail extends JFrame implements ActionListener {
 
             if (isConfirmationSuccessful && Database.checkEmailMatch(currentEmailData.getText())){
                 Database.changeEmail(getNewEmail);
+                emailsNotMatching.setText("");
+                emailsNotMatching.setVisible(false);
+                frameNavigator.showFrame(Options.class);
             }
-            else {
-                // TODO SWING : Label "Грешно въведен настоящ имейл" under text field for current email
-                System.out.println("Current email does not match with input data");
+            else if (!Database.checkEmailMatch(currentEmailData.getText())){
+                emailsNotMatching.setText("Current email is invalid");
+
             }
 
             if (!isConfirmationSuccessful) {
+                emailsNotMatching.setText("Emails not matching");
                 emailsNotMatching.setVisible(true);
             }
             else {
@@ -126,7 +131,9 @@ public class ChangeEmail extends JFrame implements ActionListener {
 
         }
         else if (e.getSource()==cancelOperation) {
-            this.dispose();
+            frameNavigator.showFrame(Options.class);
+            emailsNotMatching.setText("");
+            emailsNotMatching.setVisible(false);
         }
     }
 }

@@ -4,9 +4,13 @@ import com.RustyRents.RustyRents.FrameNavigator.FrameNavigator;
 import com.RustyRents.RustyRents.MainMenu.MainMenu;
 import com.RustyRents.RustyRents.Register.Register;
 import com.RustyRents.RustyRents.Database.Database;
+import com.RustyRents.RustyRents.Security.SecretQuestion;
 import com.RustyRents.RustyRents.Services.EmailSenderService;
-import com.RustyRents.RustyRents.Tokens.SoftwareToken;
+import com.RustyRents.RustyRents.Security.SoftwareToken;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -21,8 +25,10 @@ public class LogIn extends JFrame implements ActionListener {
     JLabel headerImage, usernameLabel, passwordLabel, errorlabel;
     ImageIcon appIcon, logInIcon;
     Image rustyRentsLogo, newing;
-    JTextField usernameTextField;
-    JPasswordField passwordTextField;
+    static JTextField usernameTextField;
+    static JPasswordField passwordTextField;
+
+    private static final Logger logger = LogManager.getLogger(LogIn.class.getName());
 
     JRadioButton emailCodeRB, softwareTokenRB, secretQuestionRB;
 
@@ -113,19 +119,43 @@ public class LogIn extends JFrame implements ActionListener {
         this.add(footerPanel,BorderLayout.SOUTH);
     }
 
+    public static void clearFields() {
+        usernameTextField.setText("");
+        passwordTextField.setText("");
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
 
+        // SQL Injection Protected
         String username = Database.injectionProtection(usernameTextField.getText());
         String password = Database.injectionProtection(new String(passwordTextField.getPassword()));
 
-        if(e.getSource()==registerButton){
+        // SQL Injection Vulnerable
+        // String username = usernameTextField.getText();
+        // String password = new String(passwordTextField.getPassword());
+
+        if(e.getSource() == emailCodeRB) {
+            softwareTokenRB.setSelected(false);
+            secretQuestionRB.setSelected(false);
+        }
+
+        else if(e.getSource() == softwareTokenRB) {
+            emailCodeRB.setSelected(false);
+            secretQuestionRB.setSelected(false);
+        }
+
+        else if(e.getSource() == secretQuestionRB) {
+            emailCodeRB.setSelected(false);
+            softwareTokenRB.setSelected(false);
+        }
+
+        else if(e.getSource()==registerButton){
             frameNavigator.showFrame(Register.class);
         }
 
-        if(e.getSource()==logInButton){
-            // Username and Password combination exist in Database i.e. Login is successful
-            System.out.println(Database.getCurrentUserId());
+        else if(e.getSource()==logInButton){
+            // NOT VULNERABLE
             if (Database.isValidLogin(username, password)) {
 
                 Database.setCurrentUserId(Database.getUserId(username));
@@ -136,7 +166,7 @@ public class LogIn extends JFrame implements ActionListener {
                         frameNavigator.showFrame(LogInEmailCodeWindow.class);
                         this.dispose();
                     } catch (Exception b) {
-                        System.out.println(b);
+                        logger.fatal(b.getMessage());
                     }
                 }
 
@@ -144,15 +174,15 @@ public class LogIn extends JFrame implements ActionListener {
                     try {
                         frameNavigator.showFrame(SoftwareToken.class);
                     } catch (Exception b) {
-                        System.out.println(b);
+                        logger.fatal(b.getMessage());
                     }
                 }
 
                 else if (secretQuestionRB.isSelected()) {
                     try {
-                        frameNavigator.showFrame(MainMenu.class);
+                        frameNavigator.showFrame(SecretQuestion.class);
                     } catch (Exception b) {
-                        System.out.println(b);
+                        logger.fatal(b.getMessage());
                     }
                 }
 
@@ -160,6 +190,41 @@ public class LogIn extends JFrame implements ActionListener {
             else {
                 // TODO SWING : Red label for failed login attempt ("Неправилно въведени данни")
             }
+
+
+
+            // VULNERABLE EXAMPLE
+
+            /*
+                Database.setCurrentUserId(Database.isValidLoginVulnerable(username, password));
+                if (emailCodeRB.isSelected()) {
+                    try {
+                        Database.generateEmailCode();
+                        emailSend.sendEmail(Database.getEmail(), "Rusty Rents Authentication Code", Database.getCurrentGeneratedCode());
+                        frameNavigator.showFrame(LogInEmailCodeWindow.class);
+                        this.dispose();
+                    } catch (Exception b) {
+                              logger.fatal(b.getMessage());
+                    }
+                }
+
+                else if (softwareTokenRB.isSelected()) {
+                    try {
+                        frameNavigator.showFrame(SoftwareToken.class);
+                    } catch (Exception b) {
+                              logger.fatal(b.getMessage());
+                    }
+                }
+
+                else if (secretQuestionRB.isSelected()) {
+                    try {
+                        frameNavigator.showFrame(MainMenu.class);
+                    } catch (Exception b) {
+                              logger.fatal(b.getMessage());
+                    }
+                }
+
+
         }
 
         if (e.getSource() == emailCodeRB) {
@@ -176,6 +241,10 @@ public class LogIn extends JFrame implements ActionListener {
             emailCodeRB.setSelected(false);
             softwareTokenRB.setSelected(false);
         }
+             */
 
     }
+
+
+}
 }

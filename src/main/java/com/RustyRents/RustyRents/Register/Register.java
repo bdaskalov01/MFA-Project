@@ -5,6 +5,8 @@ import com.RustyRents.RustyRents.LogIn.LogIn;
 import com.RustyRents.RustyRents.Database.Database;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
@@ -20,6 +22,8 @@ import java.util.Arrays;
 @Component
 public class Register extends JFrame implements ActionListener {
 
+
+    private static final Logger logger = LogManager.getLogger(Register.class.getName());
     JPanel panelContainer=new JPanel();
     JPanel firstPanel=new JPanel();
     JPanel secondPanel=new JPanel();
@@ -132,6 +136,7 @@ public class Register extends JFrame implements ActionListener {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setIconImage(appIcon.getImage());
         this.setSize(250,400);
+        this.setTitle("Register");
         this.setLocationRelativeTo(null);
      //   this.setLayout(new BorderLayout());
         this.setResizable(false);
@@ -144,8 +149,13 @@ public class Register extends JFrame implements ActionListener {
         this.setVisible(true);
     }
 
-    public void closeUI() {
-        this.setVisible(false);
+    public void onClose() {
+        usernameTextField.setText("");
+        passwordTextField.setText("");
+        confirmPasswordTextField.setText("");
+        emailTextField.setText("");
+        secretAnswerTextField.setText("");
+        secretQuestionCB.setSelectedIndex(0);
     }
 
     private static void initializeSubPanels(JPanel panel1,JPanel panel2,JPanel panel3){
@@ -177,27 +187,27 @@ public class Register extends JFrame implements ActionListener {
                     || secretAnswerTextField.getText().equals("")
                     || secretQuestionCB.getSelectedItem().toString().equals("")) {
                 // TODO SWING : Label "Има непопълнени полета"
-                System.out.println("Empty fields.");
+                logger.info("Empty fields.");
             }
             // Case when Password and Confirm Password do not match
             else if (!Arrays.equals(passwordTextField.getPassword(), confirmPasswordTextField.getPassword())) {
                 // TODO SWING : Label "Паролата не съвпада с горната"
-                System.out.println("Password and Confirm password do not match.");
+                logger.info("Password and Confirm password do not match.");
             }
             // Case when Username is taken
             else if (Database.checkIfUsernameIsTaken(usernameTextField.getText())) {
                 // TODO SWING : Label "Имейлът се използва от друг потребител."
-                System.out.println("Username is already taken.");
+                logger.info("Username is already taken.");
             }
             // Case when Email is taken
             else if (Database.checkIfEmailIsTaken(emailTextField.getText())) {
                 // TODO SWING : Label "Името се използва от друг потребител."
-                System.out.println("Email is already taken.");
+                logger.info("Email is already taken.");
             }
             else {
                 Database.addNewUser(usernameTextField.getText(), new String(passwordTextField.getPassword()), emailTextField.getText(),
                         secretQuestionCB.getSelectedItem().toString(),secretAnswerTextField.getText());
-                System.out.println("Question: " + secretQuestionCB.getSelectedItem().toString() + ", Answer: " + secretAnswerTextField.getText());
+                logger.debug("Question: " + secretQuestionCB.getSelectedItem().toString() + ", Answer: " + secretAnswerTextField.getText());
                 frameNavigator.showFrame(LogIn.class);
             }
         }

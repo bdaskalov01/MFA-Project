@@ -1,5 +1,7 @@
 package com.RustyRents.RustyRents.Listings;
 
+import com.RustyRents.RustyRents.Admin.AdminPanel;
+import com.RustyRents.RustyRents.Admin.ListingsAdmin;
 import com.RustyRents.RustyRents.Database.Database;
 import com.RustyRents.RustyRents.FrameNavigator.FrameNavigator;
 import com.mysql.cj.log.Log;
@@ -9,29 +11,30 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.xml.crypto.Data;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.sql.ResultSet;
 
 @Component
-public class AddListing extends JFrame implements ActionListener {
+public class EditListing extends JFrame implements ActionListener {
     private final FrameNavigator frameNavigator;
-
     private static final Logger logger = LogManager.getLogger(AddListing.class.getName());
-   private int amountOfPics = 0;
-   private String[] imagePath;
+    private int amountOfPics = 0;
+    private String[] imagePath;
 
     JLabel titleLabel, cityLabel, listingTypeLabel, priceLabel, neighbourhoodLabel, streetLabel, streetNumberLabel,
-    floorLabel, roomNumberLabel, qSizeLabel, phoneNumberLabel, imageLabel1, imageLabel2, imageLabel3, imageLabel4,
+            floorLabel, roomNumberLabel, qSizeLabel, phoneNumberLabel, imageLabel1, imageLabel2, imageLabel3, imageLabel4,
             imageLabel5, imageLabel6, imageLabel7, imageLabel8, imageLabel9;
 
     JLabel[] imageLabels = new JLabel[9];
 
     JTextField titleInput, cityInput, listingTypeInput, priceInput, neighbourhoodInput, streetInput, streetNumberInput,
-    floorInput, roomNumberInput, qSizeInput, phoneNumberInput;
+            floorInput, roomNumberInput, qSizeInput, phoneNumberInput;
 
     ImageIcon[] images;
     ImageIcon defaultIcon;
@@ -55,14 +58,14 @@ public class AddListing extends JFrame implements ActionListener {
             ImagesSubPanel, buttonsSubPanel;
 
 
-    public AddListing(FrameNavigator frameNavigator) {
+    public EditListing(FrameNavigator frameNavigator) {
         this.frameNavigator = frameNavigator;
 
         innitSubPanels();
         innitPanels();
 
         this.setTitle("Добавяне на обява");
-      //  this.setIconImage(appIcon.getImage());
+        //  this.setIconImage(appIcon.getImage());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setBackground(new Color(248,240,255));
         this.setForeground(Color.WHITE);
@@ -283,7 +286,7 @@ public class AddListing extends JFrame implements ActionListener {
                     parent.revalidate();
                     parent.repaint();
                     amountOfPics--;
-                    imagePath[1] = null;
+                    imagePath[0] = null;
                 }
             }
         });
@@ -300,7 +303,7 @@ public class AddListing extends JFrame implements ActionListener {
                     parent.revalidate();
                     parent.repaint();
                     amountOfPics--;
-                    imagePath[2] = null;
+                    imagePath[1] = null;
                 }
 
             }
@@ -318,7 +321,7 @@ public class AddListing extends JFrame implements ActionListener {
                     parent.revalidate();
                     parent.repaint();
                     amountOfPics--;
-                    imagePath[3] = null;
+                    imagePath[2] = null;
                 }
             }
         });
@@ -335,7 +338,7 @@ public class AddListing extends JFrame implements ActionListener {
                     parent.revalidate();
                     parent.repaint();
                     amountOfPics--;
-                    imagePath[4] = null;
+                    imagePath[3] = null;
                 }
             }
         });
@@ -352,7 +355,7 @@ public class AddListing extends JFrame implements ActionListener {
                     parent.revalidate();
                     parent.repaint();
                     amountOfPics--;
-                    imagePath[5] = null;
+                    imagePath[4] = null;
                 }
             }
         });
@@ -369,7 +372,7 @@ public class AddListing extends JFrame implements ActionListener {
                     parent.revalidate();
                     parent.repaint();
                     amountOfPics--;
-                    imagePath[6] = null;
+                    imagePath[5] = null;
                 }
             }
         });
@@ -386,7 +389,7 @@ public class AddListing extends JFrame implements ActionListener {
                     parent.revalidate();
                     parent.repaint();
                     amountOfPics--;
-                    imagePath[7] = null;
+                    imagePath[6] = null;
                 }
             }
         });
@@ -403,7 +406,7 @@ public class AddListing extends JFrame implements ActionListener {
                     parent.revalidate();
                     parent.repaint();
                     amountOfPics--;
-                    imagePath[8] = null;
+                    imagePath[7] = null;
                 }
             }
         });
@@ -420,7 +423,7 @@ public class AddListing extends JFrame implements ActionListener {
                     parent.revalidate();
                     parent.repaint();
                     amountOfPics--;
-                    imagePath[9] = null;
+                    imagePath[8] = null;
                 }
             }
         });
@@ -457,17 +460,31 @@ public class AddListing extends JFrame implements ActionListener {
     }
 
     private void clearTextFields() {
-       titleInput.setText("");
-       cityInput.setText("");
-       listingTypeInput.setText("");
-       priceInput.setText("");
-       neighbourhoodInput.setText("");
-       streetInput.setText("");
-       streetNumberInput.setText("");
-       floorInput.setText("");
-       roomNumberInput.setText("");
-       qSizeInput.setText("");
-       phoneNumberInput.setText("");
+        titleInput.setText("");
+        cityInput.setText("");
+        listingTypeInput.setText("");
+        priceInput.setText("");
+        neighbourhoodInput.setText("");
+        streetInput.setText("");
+        streetNumberInput.setText("");
+        floorInput.setText("");
+        roomNumberInput.setText("");
+        qSizeInput.setText("");
+        phoneNumberInput.setText("");
+    }
+
+    public void refreshUI() {
+        titleInput.setText(Database.getPropertyTitle());
+        cityInput.setText(Database.getPropertyCity());
+        listingTypeInput.setText(Database.getPropertyType());
+        priceInput.setText(Database.getPropertyPrice());
+        neighbourhoodInput.setText(Database.getPropertyNeighbourhood());
+        streetInput.setText(Database.getPropertyStreet());
+        streetNumberInput.setText(Database.getPropertyStreetNumber());
+        floorInput.setText(Database.getPropertyFloor());
+        roomNumberInput.setText(Database.getPropertyRoomNumber());
+        qSizeInput.setText(Database.getPropertyQSize());
+        phoneNumberInput.setText(Database.getPropertyPhoneNumber());
     }
 
     private void removeImages() {
@@ -476,20 +493,58 @@ public class AddListing extends JFrame implements ActionListener {
         }
     }
 
+    private void loadImages() {
+
+    }
+
+    private void getImages() {
+        try {
+            ResultSet rs = Database.getListingImage();
+            int counter = 0;
+            while(rs.next()) {
+                amountOfPics++;
+                imagePath[counter] = Database.imagePathDBOutput(rs.getString(1));
+                counter++;
+            }
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+
+        for (int i = 0; i < imagePath.length; i++) {
+            if (imagePath[i] != null) {
+                images[i] = new ImageIcon(imagePath[i]);
+                imageScale = images[i].getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+                images[i] = new ImageIcon(imageScale);
+                imageLabels[i].setIcon(images[i]);
+            }
+        }
+
+
+    }
     @Override
     public void actionPerformed(ActionEvent e) {
 
         if (e.getSource() == backButton) {
+            if (frameNavigator.getOlderFrame() instanceof ListingsAdmin) {
+                frameNavigator.showFrame(ListingsAdmin.class);
+                amountOfPics = 0;
+            }
+            else {
                 frameNavigator.showFrame(MyListings.class);
-                clearTextFields();
+                amountOfPics = 0;
+            }
+            clearTextFields();
         }
 
         else if (e.getSource() == nextButton) {
             this.remove(firstPanel);
             this.add(secondPanel);
             this.pack();
+            getImages();
             this.revalidate();
             this.repaint();
+            logger.debug(amountOfPics);
         }
 
         else if (e.getSource() == secondBackButton) {
@@ -501,15 +556,16 @@ public class AddListing extends JFrame implements ActionListener {
         }
 
         else if (e.getSource() == finishButton) {
-            Database.insertNewListing(Database.injectionProtection(titleInput.getText()), Database.injectionProtection(cityInput.getText()),
+            Database.updateListing(Database.injectionProtection(titleInput.getText()), Database.injectionProtection(cityInput.getText()),
                     Database.injectionProtection(listingTypeInput.getText()), Database.injectionProtection(priceInput.getText()), Database.injectionProtection(neighbourhoodInput.getText()),
                     Database.injectionProtection(streetInput.getText()), Database.injectionProtection(streetNumberInput.getText()), Database.injectionProtection(floorInput.getText()),
                     Database.injectionProtection(roomNumberInput.getText()), Database.injectionProtection(qSizeInput.getText()), Database.injectionProtection(phoneNumberInput.getText()));
-            for (int i = 0; i < imagePath.length; i++) {
-                if(imagePath[i] != null) {
+            Database.removeListingImages();
+              for (int i = 0; i < imagePath.length; i++) {
+                 if(imagePath[i] != null) {
                     Database.addListingImages(Database.imagePathDBInput(imagePath[i]));
-                }
-            }
+                 }
+               }
             this.remove(secondPanel);
             this.add(firstPanel);
             clearTextFields();
@@ -518,7 +574,12 @@ public class AddListing extends JFrame implements ActionListener {
             this.pack();
             this.revalidate();
             this.repaint();
-            frameNavigator.showFrame(MyListings.class);
+            if (frameNavigator.getOlderFrame() instanceof ListingsAdmin) {
+                frameNavigator.showFrame(ListingsAdmin.class);
+            }
+            else {
+                frameNavigator.showFrame(MyListings.class);
+            }
         }
 
         else if (e.getSource() == selectImageButton) {
