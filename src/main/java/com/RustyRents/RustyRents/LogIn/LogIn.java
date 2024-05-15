@@ -10,7 +10,6 @@ import com.RustyRents.RustyRents.Security.SoftwareToken;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
@@ -22,7 +21,9 @@ import java.awt.event.ActionListener;
 public class LogIn extends JFrame implements ActionListener {
     JPanel headerPanel, bodyPanel, footerPanel;
     JButton logInButton, registerButton;
-    JLabel headerImage, usernameLabel, passwordLabel, errorlabel;
+    JLabel headerImage, usernameLabel, passwordLabel, errorLabel;
+
+    JOptionPane popUpPane;
     ImageIcon appIcon, logInIcon;
     Image rustyRentsLogo, newing;
     static JTextField usernameTextField;
@@ -30,7 +31,7 @@ public class LogIn extends JFrame implements ActionListener {
 
     private static final Logger logger = LogManager.getLogger(LogIn.class.getName());
 
-    JRadioButton emailCodeRB, softwareTokenRB, secretQuestionRB;
+    JRadioButton emailCodeRB, softwareTokenRB, secretQuestionRB, hardwareTokenRB;
 
     @Autowired
     private EmailSenderService emailSend;
@@ -49,12 +50,13 @@ public class LogIn extends JFrame implements ActionListener {
 
 
         headerPanel = new JPanel();
-        headerPanel.setPreferredSize(new Dimension(100,150));
+        headerPanel.setPreferredSize(new Dimension(100,140));
         headerPanel.setBackground(new Color(248,240,255));
 
         bodyPanel = new JPanel();
         bodyPanel.setPreferredSize(new Dimension(100,100));
         bodyPanel.setBackground(new Color(248,240,255));
+
 
         footerPanel = new JPanel();
         footerPanel.setPreferredSize(new Dimension(100,70));
@@ -88,6 +90,10 @@ public class LogIn extends JFrame implements ActionListener {
         softwareTokenRB = new JRadioButton("Software Token Code");
         softwareTokenRB.addActionListener(this);
         bodyPanel.add(softwareTokenRB, BorderLayout.SOUTH);
+
+        hardwareTokenRB = new JRadioButton("Hardware Token Code");
+        hardwareTokenRB.addActionListener(this);
+        bodyPanel.add(hardwareTokenRB, BorderLayout.SOUTH);
 
         secretQuestionRB = new JRadioButton("Secret Question");
         secretQuestionRB.addActionListener(this);
@@ -138,16 +144,25 @@ public class LogIn extends JFrame implements ActionListener {
         if(e.getSource() == emailCodeRB) {
             softwareTokenRB.setSelected(false);
             secretQuestionRB.setSelected(false);
+            hardwareTokenRB.setSelected(false);
         }
 
         else if(e.getSource() == softwareTokenRB) {
             emailCodeRB.setSelected(false);
             secretQuestionRB.setSelected(false);
+            hardwareTokenRB.setSelected(false);
+        }
+
+        else if(e.getSource() == hardwareTokenRB) {
+            emailCodeRB.setSelected(false);
+            secretQuestionRB.setSelected(false);
+            softwareTokenRB.setSelected(false);
         }
 
         else if(e.getSource() == secretQuestionRB) {
             emailCodeRB.setSelected(false);
             softwareTokenRB.setSelected(false);
+            hardwareTokenRB.setSelected(false);
         }
 
         else if(e.getSource()==registerButton){
@@ -160,35 +175,72 @@ public class LogIn extends JFrame implements ActionListener {
 
                 Database.setCurrentUserId(Database.getUserId(username));
                 if (emailCodeRB.isSelected()) {
-                    try {
-                        Database.generateEmailCode();
-                        emailSend.sendEmail(Database.getEmail(), "Rusty Rents Authentication Code", Database.getCurrentGeneratedCode());
-                        frameNavigator.showFrame(LogInEmailCodeWindow.class);
-                        this.dispose();
-                    } catch (Exception b) {
-                        logger.fatal(b.getMessage());
+                    if(Database.isEmailEnabled()) {
+                        try {
+                            Database.generateEmailCode();
+                            emailSend.sendEmail(Database.getEmail(), "Rusty Rents Authentication Code", Database.getCurrentGeneratedCode());
+                            frameNavigator.showFrame(LogInEmailCodeWindow.class);
+                            this.dispose();
+                        } catch (Exception b) {
+                            logger.fatal(b.getMessage());
+                        }
+                    }
+                    else {
+                        JOptionPane.showMessageDialog(null, "Email option is disabled by user.");
                     }
                 }
 
                 else if (softwareTokenRB.isSelected()) {
-                    try {
-                        frameNavigator.showFrame(SoftwareToken.class);
-                    } catch (Exception b) {
-                        logger.fatal(b.getMessage());
+                    if(Database.isSoftwareEnabled()) {
+                        try {
+                            frameNavigator.showFrame(SoftwareToken.class);
+                            frameNavigator.showFrame(LogInSoftwareTokenPopUp.class);
+                        } catch (Exception b) {
+                            logger.fatal(b.getMessage());
+                        }
                     }
+                    else {
+                       JOptionPane.showMessageDialog(null, "Software Token option is disabled by user.");
+                    }
+
+                }
+
+                else if (hardwareTokenRB.isSelected()) {
+                    if(Database.isHardwareEnabled()) {
+                        try {
+                            if (Database.readHardwareToken("hardwaretoken.txt")) {
+                                frameNavigator.showFrame(MainMenu.class);
+                            }
+                            else {
+                                JOptionPane.showMessageDialog(null, "Nope");
+                            }
+                        } catch (Exception b) {
+                            logger.fatal(b.getMessage());
+                        }
+                    }
+                    else {
+                        JOptionPane.showMessageDialog(null, "Hardware Token option is disabled by user.");
+                    }
+
                 }
 
                 else if (secretQuestionRB.isSelected()) {
-                    try {
-                        frameNavigator.showFrame(SecretQuestion.class);
-                    } catch (Exception b) {
-                        logger.fatal(b.getMessage());
+                    if (Database.isSecretQEnabled()) {
+                        try {
+                            frameNavigator.showFrame(SecretQuestion.class);
+                        } catch (Exception b) {
+                            logger.fatal(b.getMessage());
+                        }
+                    }
+                    else {
+                        JOptionPane.showMessageDialog(null, "Secret Question option is disabled by user.");
                     }
                 }
 
             }
             else {
-                // TODO SWING : Red label for failed login attempt ("Неправилно въведени данни")
+
+                JOptionPane.showMessageDialog(null, "Wrong credentials or user doesn't exist.");
             }
 
 

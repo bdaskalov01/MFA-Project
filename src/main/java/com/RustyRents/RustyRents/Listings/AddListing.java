@@ -61,7 +61,7 @@ public class AddListing extends JFrame implements ActionListener {
         innitSubPanels();
         innitPanels();
 
-        this.setTitle("Добавяне на обява");
+        this.setTitle("Add listing");
       //  this.setIconImage(appIcon.getImage());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setBackground(new Color(248,240,255));

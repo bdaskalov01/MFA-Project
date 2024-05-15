@@ -60,17 +60,14 @@ public class ListingsAdmin extends JFrame implements ActionListener {
         ImageIcon backIcon = new ImageIcon("BackIcon.png");
         ImageIcon appIcon = new ImageIcon("RustyRentsIcon.png");
 
-        //TODO replace column objects with DB values
         columns = new Object[] {"Номер на обява", "Име на обява", "Град", "Вид имот", "Цена"};
 
 
         model = new DefaultTableModel();
         model.setColumnIdentifiers(columns);
 
-        //TODO Connect DB with table
         table = new JTable();
         table.setModel(model);
-        //table.setBackground(Color.MAGENTA);
         table.setForeground(Color.black);
         table.setSelectionBackground(Color.MAGENTA);
         table.setGridColor(Color.red);

@@ -37,16 +37,16 @@ public class ChangePassword extends JFrame implements ActionListener {
         background.setVisible(true);
 
 
-        currentPassword = new JLabel("Сегашна парола: ");
+        currentPassword = new JLabel("Current password: ");
         currentPassword.setBounds(110, 21, 120, 15);
 
-        newPassword = new JLabel("Нова парола: ");
+        newPassword = new JLabel("New password: ");
         newPassword.setBounds(130, 80, 120, 15);
 
-        confirmPassword = new JLabel("Потвърди паролата: ");
-        confirmPassword.setBounds(90, 140, 150, 15);
+        confirmPassword = new JLabel("Confirm new password: ");
+        confirmPassword.setBounds(85, 140, 150, 15);
 
-        passwordsNotMatching = new JLabel("Паролите не съвпадат.");
+        passwordsNotMatching = new JLabel("Passwords don't match.");
         passwordsNotMatching.setBounds(170,170,200,30);
         passwordsNotMatching.setForeground(Color.RED);
         passwordsNotMatching.setVisible(false);
@@ -62,14 +62,14 @@ public class ChangePassword extends JFrame implements ActionListener {
         confirmNewPasswordTextField.setBounds(220, 135, 195, 30);
 
 
-        changePassword = new JButton("Смени паролата");
+        changePassword = new JButton("Change password");
         changePassword.setBounds(70, 200, 150, 50);
         changePassword.setFocusable(false);
         changePassword.addActionListener(this);
         changePassword.setBackground(new Color(139,0,139));
         changePassword.setForeground(Color.WHITE);
 
-        cancelOperation = new JButton("Отказ");
+        cancelOperation = new JButton("Cancel");
         cancelOperation.setBounds(260, 200, 150 , 50);
         cancelOperation.setFocusable(false);
         cancelOperation.addActionListener(this);
@@ -91,11 +91,12 @@ public class ChangePassword extends JFrame implements ActionListener {
         layeredPane.add(passwordsNotMatching, Integer.valueOf(9));
 
 
-        this.setTitle("Смяна на парола");
+        this.setTitle("Change password");
         this.setIconImage(appIcon.getImage());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
         this.setSize(500,300);
+        this.setLocationRelativeTo(null);
         this.add(layeredPane);
     }
 
@@ -111,7 +112,7 @@ public class ChangePassword extends JFrame implements ActionListener {
             if (isConfirmationSuccessful && Database.checkPasswordMatch(new String(currentPasswordTextField.getPassword()))) {
                 Database.changePassword(getNewPassword);
                 passwordsNotMatching.setVisible(false);
-                frameNavigator.showFrame(Options.class);
+                frameNavigator.showFrame(MyProfile.class);
             }
             else if (!Database.checkPasswordMatch(new String(currentPasswordTextField.getPassword()))){
                 passwordsNotMatching.setText("Current password doesn't match");
@@ -127,7 +128,7 @@ public class ChangePassword extends JFrame implements ActionListener {
             }
         }
         else if(e.getSource()==cancelOperation){
-            frameNavigator.showFrame(Options.class);
+            frameNavigator.showFrame(MyProfile.class);
             passwordsNotMatching.setVisible(false);
         }
     }

@@ -259,7 +259,7 @@ public class ListingDetails extends JFrame implements ActionListener {
         innitSubPanels();
         innitPanels();
 
-        this.setTitle("Детайли на обява");
+        this.setTitle("Listing details");
         //  this.setIconImage(appIcon.getImage());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setBackground(new Color(248,240,255));

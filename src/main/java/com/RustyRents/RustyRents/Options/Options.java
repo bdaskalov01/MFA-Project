@@ -43,24 +43,8 @@ public class Options extends JFrame implements ActionListener {
         changeThemeButton.setForeground(Color.white);
         changeThemeButton.setFocusable(false);
 
-        changeEmailButton = new JButton();
-        changeEmailButton.setBounds(120,210,250,50);
-        changeEmailButton.setText("Change Email");
-        changeEmailButton.addActionListener(this);
-        changeEmailButton.setBackground(new Color(139,0,139));
-        changeEmailButton.setForeground(Color.white);
-        changeEmailButton.setFocusable(false);
-
-        changePasswordButton = new JButton();
-        changePasswordButton.setBounds(120,290,250,50);
-        changePasswordButton.setText("Change Password");
-        changePasswordButton.addActionListener(this);
-        changePasswordButton.setBackground(new Color(139,0,139));
-        changePasswordButton.setForeground(Color.white);
-        changePasswordButton.setFocusable(false);
-
         termsAndConditionsButton = new JButton();
-        termsAndConditionsButton.setBounds(120,370,250,50);
+        termsAndConditionsButton.setBounds(120,210,250,50);
         termsAndConditionsButton.setText("Terms and Conditions");
         termsAndConditionsButton.setBackground(new Color(139,0,139));
         termsAndConditionsButton.setForeground(Color.white);
@@ -78,9 +62,7 @@ public class Options extends JFrame implements ActionListener {
         layeredPane.add(backButton,0);
         layeredPane.add(resolutionButton,1);
         layeredPane.add(changeThemeButton, 2);
-        layeredPane.add(changeEmailButton, 3);
-        layeredPane.add(changePasswordButton, 4);
-        layeredPane.add(termsAndConditionsButton, 5);
+        layeredPane.add(termsAndConditionsButton, 3);
         layeredPane.setBounds(0,0,500,500);
         layeredPane.setBackground(new Color(248,240,255));
         layeredPane.setVisible(true);

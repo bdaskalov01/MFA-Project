@@ -127,7 +127,7 @@ public class SoftwareToken extends JFrame implements ActionListener {
 
         this.setTitle("Software token");
        //this.setIconImage(logo.getImage());
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         this.setResizable(false);
         this.setSize(300,250);
 

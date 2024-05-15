@@ -58,17 +58,14 @@ public class UsersAdmin extends JFrame implements ActionListener {
         ImageIcon backIcon = new ImageIcon("BackIcon.png");
         ImageIcon appIcon = new ImageIcon("RustyRentsIcon.png");
 
-        //TODO replace column objects with DB values
         columns = new Object[] {"Username", "Password", "Email", "Secret Question", "Hardware Token"};
 
 
         model = new DefaultTableModel();
         model.setColumnIdentifiers(columns);
 
-        //TODO Connect DB with table
         table = new JTable();
         table.setModel(model);
-        //table.setBackground(Color.MAGENTA);
         table.setForeground(Color.black);
         table.setSelectionBackground(Color.MAGENTA);
         table.setGridColor(Color.red);
@@ -222,11 +219,12 @@ public class UsersAdmin extends JFrame implements ActionListener {
         }
 
         else if (e.getSource() == editPropertyButton) {
-            frameNavigator.showFrame(AddListing.class);
+            frameNavigator.showFrame(EditUser.class);
         }
 
         else if (e.getSource() == deletePropertyButton) {
-            Database.deleteUser(Database.getSelectedUserId());
+            Database.deleteUser();
+            Database.deleteProperty();
             onCloseInnit();
             refreshUIData();
         }

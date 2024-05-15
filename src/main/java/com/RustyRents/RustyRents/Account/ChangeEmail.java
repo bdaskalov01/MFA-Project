@@ -38,14 +38,14 @@ public class ChangeEmail extends JFrame implements ActionListener {
         background.setVisible(true);
 
 
-        currentEmail = new JLabel("Сегашен email: ");
-        currentEmail.setBounds(120, 21, 120, 15);
+        currentEmail = new JLabel("Current email: ");
+        currentEmail.setBounds(135, 21, 120, 15);
 
-        newEmail = new JLabel("Нов email: ");
-        newEmail.setBounds(150, 80, 120, 15);
+        newEmail = new JLabel("New email: ");
+        newEmail.setBounds(155, 80, 120, 15);
 
-        confirmEmail = new JLabel("Потвърди email: ");
-        confirmEmail.setBounds(115, 140, 150, 15);
+        confirmEmail = new JLabel("Confirm new email: ");
+        confirmEmail.setBounds(110, 140, 150, 15);
 
         emailsNotMatching = new JLabel("");
         emailsNotMatching.setBounds(170,170,200,30);
@@ -63,14 +63,14 @@ public class ChangeEmail extends JFrame implements ActionListener {
         confirmEmailData.setBounds(220, 135, 195, 30);
 
 
-        changeEmail = new JButton("Смени email");
+        changeEmail = new JButton("Change email");
         changeEmail.setBounds(70, 200, 150, 50);
         changeEmail.setFocusable(false);
         changeEmail.addActionListener(this);
         changeEmail.setBackground(new Color(139,0,139));
         changeEmail.setForeground(Color.WHITE);
 
-        cancelOperation = new JButton("Отказ");
+        cancelOperation = new JButton("Cancel");
         cancelOperation.setBounds(260, 200, 150 , 50);
         cancelOperation.setFocusable(false);
         cancelOperation.addActionListener(this);
@@ -92,7 +92,7 @@ public class ChangeEmail extends JFrame implements ActionListener {
         layeredPane.add(emailsNotMatching, Integer.valueOf(9));
 
 
-        this.setTitle("Смяна на email");
+        this.setTitle("Change email");
         this.setIconImage(appIcon.getImage());
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
@@ -114,7 +114,7 @@ public class ChangeEmail extends JFrame implements ActionListener {
                 Database.changeEmail(getNewEmail);
                 emailsNotMatching.setText("");
                 emailsNotMatching.setVisible(false);
-                frameNavigator.showFrame(Options.class);
+                frameNavigator.showFrame(MyProfile.class);
             }
             else if (!Database.checkEmailMatch(currentEmailData.getText())){
                 emailsNotMatching.setText("Current email is invalid");
@@ -131,7 +131,7 @@ public class ChangeEmail extends JFrame implements ActionListener {
 
         }
         else if (e.getSource()==cancelOperation) {
-            frameNavigator.showFrame(Options.class);
+            frameNavigator.showFrame(MyProfile.class);
             emailsNotMatching.setText("");
             emailsNotMatching.setVisible(false);
         }

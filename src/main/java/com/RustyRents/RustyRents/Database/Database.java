@@ -5,8 +5,16 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.apache.commons.lang3.RandomStringUtils;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import javax.sql.DataSource;
+import javax.swing.*;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.*;
+import java.util.Base64;
 
 @Component
 public class Database {
@@ -14,6 +22,9 @@ public class Database {
     private static int currentUserId = 0;
 
     private static int currentSTUserID = 0;
+
+    private static final String SECRET_KEY = "YourSecretKey123"; // 16 characters for AES-128, 24 characters for AES-192, 32 characters for AES-256
+    private static final String INIT_VECTOR = "YourInitVector12"; // 16 bytes IV for AES
 
     private static int selectedUserId = 0;
     private static int currentListingId = 0;
@@ -102,6 +113,7 @@ public class Database {
                 ResultSet rs = statement.executeQuery("SELECT MAX(user_id) FROM users");
                 rs.next();
                 newUserId = rs.getInt(1);
+                statement.execute("INSERT INTO twofa VALUES (" + newUserId + ", TRUE, TRUE, TRUE, TRUE)");
                 storeNewLogin(newUserId, password);
                 question = question.replace("'", "");
                 answer = answer.replace("'", "");
@@ -192,6 +204,325 @@ public class Database {
             logger.fatal(e.getMessage());
         }
         return null;
+    }
+
+    public static ResultSet getUserDetailsAdmin() {
+
+        query = "SELECT A.username, A.email, B.password, C.question, C.answer\n" +
+                "FROM users as A\n" +
+                "LEFT JOIN no_hackers_pls as B\n" +
+                "on A.user_id = B.user_id\n" +
+                "LEFT JOIN secretquestion as C\n" +
+                "on A.user_id = C.user_id\n" +
+                "WHERE A.user_id = " + selectedUserId;
+
+        logger.info("getUserDetails: Query to select all users and get their credentials and info.");
+        logger.debug(query);
+
+        try {
+            ResultSet rs = statement.executeQuery(query);
+            return rs;
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+        return null;
+    }
+
+    public static boolean isSoftwareEnabled() {
+        query = "SELECT software FROM twofa WHERE user_id = " + currentUserId;
+        logger.debug(query);
+        try {
+            ResultSet rs = statement.executeQuery(query);
+            rs.next();
+            return rs.getBoolean(1);
+        }
+        catch(Exception e) {
+            logger.fatal(e);
+        }
+
+        return false;
+    }
+
+    public static boolean isHardwareEnabled() {
+        query = "SELECT hardware FROM twofa WHERE user_id = " + currentUserId;
+        logger.debug(query);
+        try {
+            ResultSet rs = statement.executeQuery(query);
+            rs.next();
+            return rs.getBoolean(1);
+        }
+        catch(Exception e) {
+            logger.fatal(e);
+        }
+
+        return false;
+    }
+
+    public static boolean isSecretQEnabled() {
+        query = "SELECT secretquestion FROM twofa WHERE user_id = " + currentUserId;
+        logger.debug(query);
+        try {
+            ResultSet rs = statement.executeQuery(query);
+            rs.next();
+            return rs.getBoolean(1);
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+
+        return false;
+    }
+
+    public static boolean isEmailEnabled() {
+        query = "SELECT email FROM twofa WHERE user_id = " + currentUserId;
+        logger.debug(query);
+        try {
+            ResultSet rs = statement.executeQuery(query);
+            rs.next();
+            return rs.getBoolean(1);
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+
+        return false;
+    }
+
+    public static void disableSoftware() {
+        query = "UPDATE twofa SET software = FALSE WHERE user_id = " + currentUserId;
+        logger.debug(query);
+        try {
+            statement.executeUpdate(query);
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+    }
+
+    public static void enableSoftware() {
+        query = "UPDATE twofa SET software = TRUE WHERE user_id = " + currentUserId;
+        logger.debug(query);
+        try {
+            statement.executeUpdate(query);
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+    }
+
+    public static void disableEmail() {
+        query = "UPDATE twofa SET email = FALSE WHERE user_id = " + currentUserId;
+        logger.debug(query);
+        try {
+            statement.executeUpdate(query);
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+    }
+
+    public static void enableEmail() {
+        query = "UPDATE twofa SET email = TRUE WHERE user_id = " + currentUserId;
+        logger.debug(query);
+        try {
+            statement.executeUpdate(query);
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+    }
+
+    public static void disableHardware() {
+        query = "UPDATE twofa SET hardware = FALSE WHERE user_id = " + currentUserId;
+        logger.debug(query);
+        try {
+            statement.executeUpdate(query);
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+    }
+
+    public static void enableHardware() {
+        query = "UPDATE twofa SET hardware = TRUE WHERE user_id = " + currentUserId;
+        logger.debug(query);
+        try {
+            statement.executeUpdate(query);
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+    }
+
+    public static void disableSecretQuestion() {
+        query = "UPDATE twofa SET secretquestion = FALSE WHERE user_id = " + currentUserId;
+        logger.debug(query);
+        try {
+            statement.executeUpdate(query);
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+    }
+
+    public static void enableSecretQuestion() {
+        query = "UPDATE twofa SET secretquestion = TRUE WHERE user_id = " + currentUserId;
+        logger.debug(query);
+        try {
+            statement.executeUpdate(query);
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+    }
+
+    public static boolean isSoftwareEnabledAdmin() {
+        query = "SELECT software FROM twofa WHERE user_id = " + selectedUserId;
+        logger.debug(query);
+        try {
+            ResultSet rs = statement.executeQuery(query);
+            rs.next();
+            return rs.getBoolean(1);
+        }
+        catch(Exception e) {
+            logger.fatal(e);
+        }
+
+        return false;
+    }
+
+    public static boolean isHardwareEnabledAdmin() {
+        query = "SELECT hardware FROM twofa WHERE user_id = " + selectedUserId;
+        logger.debug(query);
+        try {
+            ResultSet rs = statement.executeQuery(query);
+            rs.next();
+            return rs.getBoolean(1);
+        }
+        catch(Exception e) {
+            logger.fatal(e);
+        }
+
+        return false;
+    }
+
+    public static boolean isSecretQEnabledAdmin() {
+        query = "SELECT secretquestion FROM twofa WHERE user_id = " + selectedUserId;
+        logger.debug(query);
+        try {
+            ResultSet rs = statement.executeQuery(query);
+            rs.next();
+            return rs.getBoolean(1);
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+
+        return false;
+    }
+
+    public static boolean isEmailEnabledAdmin() {
+        query = "SELECT email FROM twofa WHERE user_id = " + selectedUserId;
+        logger.debug(query);
+        try {
+            ResultSet rs = statement.executeQuery(query);
+            rs.next();
+            return rs.getBoolean(1);
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+
+        return false;
+    }
+
+    public static void disableSoftwareAdmin() {
+        query = "UPDATE twofa SET software = FALSE WHERE user_id = " + selectedUserId;
+        logger.debug(query);
+        try {
+            statement.executeUpdate(query);
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+    }
+
+    public static void enableSoftwareAdmin() {
+        query = "UPDATE twofa SET software = TRUE WHERE user_id = " + selectedUserId;
+        logger.debug(query);
+        try {
+            statement.executeUpdate(query);
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+    }
+
+    public static void disableEmailAdmin() {
+        query = "UPDATE twofa SET email = FALSE WHERE user_id = " + selectedUserId;
+        logger.debug(query);
+        try {
+            statement.executeUpdate(query);
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+    }
+
+    public static void enableEmailAdmin() {
+        query = "UPDATE twofa SET email = TRUE WHERE user_id = " + selectedUserId;
+        logger.debug(query);
+        try {
+            statement.executeUpdate(query);
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+    }
+
+    public static void disableHardwareAdmin() {
+        query = "UPDATE twofa SET hardware = FALSE WHERE user_id = " + selectedUserId;
+        logger.debug(query);
+        try {
+            statement.executeUpdate(query);
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+    }
+
+    public static void enableHardwareAdmin() {
+        query = "UPDATE twofa SET hardware = TRUE WHERE user_id = " + selectedUserId;
+        logger.debug(query);
+        try {
+            statement.executeUpdate(query);
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+    }
+
+    public static void disableSecretQuestionAdmin() {
+        query = "UPDATE twofa SET secretquestion = FALSE WHERE user_id = " + selectedUserId;
+        logger.debug(query);
+        try {
+            statement.executeUpdate(query);
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+    }
+
+    public static void enableSecretQuestionAdmin() {
+        query = "UPDATE twofa SET secretquestion = TRUE WHERE user_id = " + selectedUserId;
+        logger.debug(query);
+        try {
+            statement.executeUpdate(query);
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
     }
 
     public static int getUserIdByUsername(String username) {
@@ -524,12 +855,10 @@ public class Database {
         return false;
 
     }
-    public static void deleteUser(int userId) {
-        //TODO add deleting data from DB after implementing future features
-
+    public static void deleteUser() {
         boolean shouldUserBeDeleted = false;
             establishConnection();
-            query = "DELETE FROM users WHERE user_id = " + userId;
+            query = "DELETE FROM users WHERE user_id = " + selectedUserId;
             logger.info("deleteUser: Query to delete a user.");
 
             try {
@@ -616,6 +945,37 @@ public class Database {
         catch (Exception e) {
             logger.fatal(e.getMessage());
         }
+    }
+
+    public static void deleteProperty() {
+
+        logger.info("deleteProperty: Query to delete specific row from the listings table");
+        query = "DELETE FROM listings WHERE user_id = " + selectedUserId;
+
+        try {
+            statement.executeUpdate(query);
+            logger.debug(query);
+
+        }
+        catch (Exception e) {
+            logger.fatal(e.getMessage());
+        }
+    }
+
+    public static ResultSet getAllPropertiesOfAUser(int selectedUserId) {
+        logger.info("getAllPropertiesOfAUser: Query to get all listings of a specific user.");
+        query = "SELECT * FROM listings WHERE user_id = " + selectedUserId;
+
+        try {
+            ResultSet rs = statement.executeQuery(query);
+            rs.next();
+            return rs;
+        }
+        catch (Exception e) {
+            logger.fatal(e.getMessage());
+        }
+
+        return null;
     }
 
 
@@ -1032,6 +1392,19 @@ public class Database {
         }
     }
 
+    public static void updateUser(String username, String password, String email, String question, String answer, String hardware){
+        try {
+            statement.executeUpdate("UPDATE users SET username = '" + username + "', email = '" + email + "' WHERE user_id = " + selectedUserId);
+            statement.executeUpdate("UPDATE no_hackers_pls SET password = '" + password + "' WHERE user_id = " + selectedUserId);
+            statement.executeUpdate("UPDATE secretquestion SET question = '" + question + "', answer = '" + answer + "' WHERE user_id = " + selectedUserId);
+            statement.executeUpdate("UPDATE hardwaretokencodes SET generatedcode = '" + hardware + "' WHERE user_id = " + selectedUserId);
+            logger.fatal(selectedUserId);
+        }
+        catch (Exception e) {
+            logger.fatal(e);
+        }
+    }
+
     public static void addListingImages(String imagePath) {
         values = "'" + currentListingId + "', '" + imagePath + "'";
         query = "INSERT INTO listingimages VALUES (" + values + ")";
@@ -1165,6 +1538,123 @@ public class Database {
         return false;
     }
 
+    public static void createHardwareToken(byte[] filedata) {
+        try {
+
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+    }
+
+    public static String encrypt(String value) {
+        try {
+            IvParameterSpec iv = new IvParameterSpec(INIT_VECTOR.getBytes("UTF-8"));
+            SecretKeySpec skeySpec = new SecretKeySpec(SECRET_KEY.getBytes("UTF-8"), "AES");
+
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
+
+            byte[] encrypted = cipher.doFinal(value.getBytes("UTF-8"));
+            return Base64.getEncoder().encodeToString(encrypted);
+        } catch (Exception ex) {
+            logger.fatal(ex.getMessage());
+        }
+        return null;
+    }
+
+    public static String decrypt(String encrypted) {
+        try {
+            IvParameterSpec iv = new IvParameterSpec(INIT_VECTOR.getBytes("UTF-8"));
+            SecretKeySpec skeySpec = new SecretKeySpec(SECRET_KEY.getBytes("UTF-8"), "AES");
+
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
+
+            byte[] original = cipher.doFinal(Base64.getDecoder().decode(encrypted.trim()));
+
+            return new String(original, "UTF-8");
+        } catch (IllegalArgumentException ex) {
+            logger.fatal("Error: Input string is not a valid Base64-encoded string.");
+        } catch (Exception ex) {
+            logger.fatal(ex.getMessage());
+        }
+
+        return null;
+    }
+
+    public static boolean readHardwareToken(String filePath) {
+        try {
+            ResultSet rs = statement.executeQuery("SELECT filepath FROM hardwaretokencodes WHERE user_id = " + currentUserId);
+
+            if(rs.next()) {
+                String fileName = rs.getString(1);
+                byte[] dbEncodedCredentials = Files.readAllBytes(Paths.get(fileName)); // Read all bytes from file
+                String dbEncryptedCredentials = new String(dbEncodedCredentials); // Convert bytes to String
+                dbEncryptedCredentials = decrypt(dbEncryptedCredentials);
+                logger.debug(dbEncryptedCredentials);
+
+                byte[] encodedCredentials = Files.readAllBytes(Paths.get(filePath)); // Read all bytes from file
+                String encryptedCredentials = new String(encodedCredentials); // Convert bytes to String
+                encryptedCredentials = decrypt(encryptedCredentials);
+                logger.debug(encryptedCredentials);
+
+                return encryptedCredentials.equals(dbEncryptedCredentials); // Decrypt and split credentials
+            }
+
+        } catch (Exception e) {
+            logger.fatal(e.getMessage());
+        }
+        return false;
+    }
+
+    public static void saveHardwareToken(String tokenCode) {
+        try {
+            String encryptedCredentials = tokenCode; // Encrypt credentials if necessary
+            encryptedCredentials = encrypt(encryptedCredentials);
+            String fileName = currentUserId + ".txt";
+
+            if (!isHardwareTokenGenerated()) {
+                statement.execute("INSERT INTO hardwaretokencodes VALUES (" + currentUserId + ", '" + fileName +"')");
+                Files.write(Paths.get(fileName), encryptedCredentials.getBytes());// Write encrypted credentials to file
+                String ds = "hardwaretoken.txt";
+                Files.write(Paths.get(ds), encryptedCredentials.getBytes());// Write encrypted credentials to file
+
+            }
+            else {
+                JOptionPane.showMessageDialog(null, "Hardware Token is already generated.");
+            }
+
+        } catch (Exception e) {
+            logger.fatal(e.getMessage()); // Handle error
+        }
+    }
+
+    public static void deleteHardwareToken(int user_id) {
+        try {
+            statement.executeUpdate("DELETE FROM hardwaretokencodes WHERE user_id = " + user_id);
+            String filePath = user_id + ".txt";
+            Files.deleteIfExists(Paths.get(filePath));
+        }
+        catch(Exception e) {
+            logger.fatal(e.getMessage());
+        }
+    }
+
+
+    public static boolean isHardwareTokenGenerated() {
+        try {
+            ResultSet rs = statement.executeQuery("SELECT * FROM hardwaretokencodes WHERE user_id = " + currentUserId);
+            if (rs.next()) {
+                return true;
+            }
+        }
+        catch (Exception e) {
+            logger.fatal(e.getMessage());
+        }
+
+        return false;
+    }
 
     public static void setCurrentUserId(int user) {
         currentUserId = user;

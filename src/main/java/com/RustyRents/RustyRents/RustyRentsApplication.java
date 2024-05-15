@@ -1,5 +1,6 @@
 package com.RustyRents.RustyRents;
 
+import com.RustyRents.RustyRents.Account.ChangeEmail;
 import com.RustyRents.RustyRents.Database.Database;
 import com.RustyRents.RustyRents.FrameNavigator.FrameNavigator;
 import com.RustyRents.RustyRents.LogIn.LogIn;
@@ -26,7 +27,6 @@ public class RustyRentsApplication {
 			Database.removeAllEmailCodes();
 			Database.removeAllSoftwareCodes();
 			FrameNavigator frameNavigator = applicationContext.getBean(FrameNavigator.class);
-		//	frameNavigator.showFrame(SoftwareToken.class);
 			frameNavigator.showFrame(LogIn.class);
 		} catch (Exception e) {
 			System.out.println(e);

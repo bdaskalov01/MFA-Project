@@ -2,6 +2,7 @@ package com.RustyRents.RustyRents.FrameNavigator;
 
 import com.RustyRents.RustyRents.Account.MyProfile;
 import com.RustyRents.RustyRents.Admin.AdminPanel;
+import com.RustyRents.RustyRents.Admin.EditUser;
 import com.RustyRents.RustyRents.Admin.ListingsAdmin;
 import com.RustyRents.RustyRents.Admin.UsersAdmin;
 import com.RustyRents.RustyRents.Listings.EditListing;
@@ -176,6 +177,14 @@ public class FrameNavigatorImpl implements FrameNavigator, ApplicationContextAwa
 
         else if (frame instanceof SoftwareToken && currentFrame instanceof SoftwareTokenEmailPopUp) {
             ((SoftwareToken) frame).setLoggedUI();
+            currentFrame = frame;
+            currentFrame.setVisible(true);
+            currentFrame.revalidate();
+            currentFrame.repaint();
+        }
+
+        else if (frame instanceof EditUser) {
+            ((EditUser) frame).refreshUI();
             currentFrame = frame;
             currentFrame.setVisible(true);
             currentFrame.revalidate();
